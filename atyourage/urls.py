@@ -15,5 +15,5 @@ urlpatterns = patterns('atyourage.views',
     # Uncomment the next line to enable the admin:
      url(r'^admin/', include(admin.site.urls)),
      url(r'^event/elapsed/(\d{1,2})/(\d{1,2})/(\d{1,2})', 'event'), 
-     url(r'^event/(\d{1,2})/(\d{1,2})/(\d{4})', 'event_with_birthday') 
+     url(r'^event/(\d{4})/(\d{1,2})/(\d{1,2})', 'event_with_birthday') 
 )

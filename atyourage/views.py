@@ -13,13 +13,13 @@ def event(request, years, months, days):
     response = serializers.serialize("json", event) 
     return HttpResponse(response)
 
-def event_with_birthday(request, month, day, year):
-    
+def event_with_birthday(request, year, month, day):    
+
     elapsed_time = utils.get_age(int(year), int(month), int(day))
 
-    years = elapsed_time[0]
-    months = elapsed_time[1]
-    days = elapsed_time[2]
+    years = elapsed_time["years"]
+    months = elapsed_time["months"]
+    days = elapsed_time["days"]
 
     event = Event.objects.filter(age_years=years, age_months=months, age_days=days)
     
