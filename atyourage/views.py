@@ -22,7 +22,7 @@ def event_with_birthday(request, year, month, day):
     days = elapsed_time["days"]
 
     event = Event.objects.filter(age_years=years, age_months=months, age_days=days)
-    
+    event.name = event.name.title()   
     response = serializers.serialize("json", event)
 
     return HttpResponse(response)
