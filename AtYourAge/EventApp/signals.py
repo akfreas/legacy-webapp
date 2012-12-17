@@ -1,0 +1,16 @@
+from django.db.models.signals import pre_delete, pre_save, post_save, post_syncdb
+
+from EventApp.models import *
+
+from django.contrib.auth import models as auth_app, get_user_model
+
+
+
+
+def auto_create_superuser(*args, **kwargs):
+
+    user = AppValveUser.objects.create_superuser("akfreas", "AppValveWin")
+    user.save()
+
+post_syncdb.connect(auto_create_superuser,
+    sender=auth_app, dispatch_uid="django.contrib.auth.management.create_superuser")
