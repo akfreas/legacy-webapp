@@ -1,9 +1,9 @@
 import os
 import re
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "atyourage.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "EventApp.settings")
 
 
-from atyourage.models import Event
+from EventApp.models import Event
 import MySQLdb
 db = MySQLdb.connect(host='localhost', user='root', passwd='', db='atyourage', charset = 'utf8', use_unicode = True)
 cursor = db.cursor()
