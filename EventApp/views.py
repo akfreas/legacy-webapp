@@ -3,8 +3,8 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.core import serializers
 
-from atyourage.models import Event
-from atyourage import settings
+from EventApp.models import Event
+from EventApp import settings
 
 import utils
 

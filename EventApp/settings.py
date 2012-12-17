@@ -13,7 +13,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'atyourage',                      # Or path to database file if using sqlite3.
-        'USER': 'akfreas',                      # Not used with sqlite3.
+        'USER': 'postgres',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
@@ -72,7 +72,6 @@ STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-AUTH_PROFILE_MODULE = 'atyourage.UserProfile'
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -102,10 +101,10 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'atyourage.urls'
+ROOT_URLCONF = 'EventApp.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'atyourage.wsgi.application'
+WSGI_APPLICATION = 'EventApp.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -114,7 +113,7 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'atyourage',
+    'EventApp',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from atyourage.models import *
+from EventApp.models import *
 
 class EventAdmin(admin.ModelAdmin):
 
