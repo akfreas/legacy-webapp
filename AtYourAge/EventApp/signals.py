@@ -1,6 +1,7 @@
 from django.db.models.signals import pre_delete, pre_save, post_save, post_syncdb
 
 from EventApp.models import *
+from django.contrib.auth.models import User
 
 from django.contrib.auth import models as auth_app, get_user_model
 
