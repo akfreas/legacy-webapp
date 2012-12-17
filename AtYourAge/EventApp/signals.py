@@ -9,7 +9,7 @@ from django.contrib.auth import models as auth_app, get_user_model
 
 def auto_create_superuser(*args, **kwargs):
 
-    user = AppValveUser.objects.create_superuser("akfreas", "AppValveWin")
+    user = User.objects.create_superuser("akfreas", "akfreas@gmail.com", "AppValveWin")
     user.save()
 
 post_syncdb.connect(auto_create_superuser,
