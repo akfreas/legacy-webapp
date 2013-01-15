@@ -4,12 +4,12 @@ from fabric.api import *
 from fabric.contrib.console import confirm
 from time import sleep
 
-env.hosts = ['ubuntu@appvalve.co']
-code_dir = '/var/www/AppValveSite-env/AppValveSite'
+env.hosts = ['ubuntu@23.21.141.254']
+code_dir = '/var/www/AtYourAge-env/AtYourAge'
 
 def deploy():
     with cd(code_dir):
-        run("git pull origin master")
+        sudo("git pull origin master")
     restart_server()
 
 
@@ -38,7 +38,7 @@ def update_dep():
 def update_db():
 
     with cd(code_dir):
-        run("source bin/activate && AppValveSite/manage.py migrate MainSite")
+        run("source bin/activate && AtYourAge/manage.py migrate MainSite")
 
 
 def hello():

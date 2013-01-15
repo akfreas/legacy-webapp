@@ -6,6 +6,8 @@ from django.core import serializers
 from EventApp.models import Event
 from EventApp import settings
 
+import json
+
 import utils
 
 def event(request, years, months, days):
@@ -21,8 +23,16 @@ def event_with_birthday(request, year, month, day):
     months = elapsed_time["months"]
     days = elapsed_time["days"]
 
-    event = Event.objects.filter(age_years=years, age_months=months, age_days=days)
-    event.name = event.name.title()   
-    response = serializers.serialize("json", event)
+    events = Event.objects.filter(age_years=years, age_months=months, age_days=days)
+    event_list = []
+    for event in events: 
+        response_dict = {'age_years' : event.age_years, 
+                'age_months' : event.age_months,
+                'age_days' : event.age_days,
+                'male' : event.male,
+                'description' : event.description,
+                'name' : event.name }
+        event_list.append(response_dict)
+    response = json.dumps(event_list)
 
     return HttpResponse(response)
