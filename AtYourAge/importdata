@@ -1,0 +1,22 @@
+import os
+import re
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "EventApp.settings")
+
+
+from EventApp.models import Event
+import MySQLdb
+db = MySQLdb.connect(host='localhost', user='root', passwd='', db='atyourage', charset = 'utf8', use_unicode = True)
+cursor = db.cursor()
+cursor.execute('SELECT NAME, EVENT, AGE_YEARS, AGE_MONTHS, AGE_DAYS, MALE FROM AgeData')
+numrows = cursor.rowcount
+
+for i in range(0, numrows):
+    row = cursor.fetchone()
+    if (row[5] == 'true'):
+        is_male = True
+    else:
+        is_male = False
+    name = row[0].title()
+    name = re.sub('^[^a-zA-z]*|[^a-zA-Z]*$','', name)
+    event = Event(name=name, description=row[1], age_years=int(row[2]), age_months=int(row[3]), age_days=int(row[4]), male=is_male)
+    event.save()

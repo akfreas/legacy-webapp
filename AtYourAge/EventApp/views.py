@@ -2,8 +2,11 @@ from django.template import RequestContext, loader
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.core import serializers
+from django.db.models import F
 
-from EventApp.models import Event
+from datetime import datetime
+
+from EventApp.models import *
 from EventApp import settings
 
 import json
@@ -15,13 +18,24 @@ def event(request, years, months, days):
     response = serializers.serialize("json", event) 
     return HttpResponse(response)
 
-def event_with_birthday(request, year, month, day):    
+def event_with_birthday(request, fb_id, year, month, day):    
 
     elapsed_time = utils.get_age(int(year), int(month), int(day))
 
     years = elapsed_time["years"]
     months = elapsed_time["months"]
     days = elapsed_time["days"]
+
+    try:
+        user = EventUser.objects.get(facebook_id=fb_id)
+    except EventUser.DoesNotExist:
+        user = EventUser(facebook_id=fb_id)
+        user.date_first_seen = datetime.now()
+
+    user.date_last_seen = datetime.now()
+    user.num_requests = 1
+    user.save()
+    
 
     events = Event.objects.filter(age_years=years, age_months=months, age_days=days)
     event_list = []
