@@ -1,5 +1,6 @@
 from datetime import datetime
 from math import floor
+from facebook import facebook
 
 def get_age(year, month, day):
 
@@ -23,3 +24,34 @@ def get_age(year, month, day):
 
      ddict = {"years": delta_list[0], "months": delta_list[1], "days": delta_list[2]}
      return ddict 
+
+def figure_profile_pic(event_obj, access_token=None):
+    graph_obj = facebook.GraphAPI(access_token)
+    results = graph_obj.get_object("search", q=event_obj.name, type="page")
+
+    public_figures = [result['id'] for result in results['data'] if result['category'] == "Public figure"]   
+              
+    ret_dict = {"image_found" : False, "img_url" : ""}
+    try:
+        first_result_id = public_figures[0]
+        img_href = graph_obj.get_object(first_result_id, fields="picture")['picture']['data']['url']
+        ret_dict['image_found'] = True
+        ret_dict['img_url'] = img_href
+    except:
+        ret_dict['image_found'] = False
+
+    return ret_dict
+
+def person_profile_pic(id, access_token=None):
+
+    graph = facebook.GraphAPI(access_token)
+
+    fb_object = graph.get_object(id, fields="picture")
+
+    print fb_object
+
+    picture_info = fb_object['picture']['data']
+
+    if picture_info['is_silhouette'] == False:
+        return picture_info['url']
+

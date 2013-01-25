@@ -4,15 +4,17 @@ from fabric.api import *
 from fabric.contrib.console import confirm
 from time import sleep
 
-env.hosts = ['ubuntu@23.21.141.254']
 code_dir = '/var/www/AtYourAge-webapp-env/AtYourAge-webapp'
+env.key_filename = "/Users/akfreas/Dropbox/sashimiblade/AppValve-deploy-data/private_keys/Alex-41.pem"
+env.host_string = "ubuntu@atyourage.sashimiblade.com"
 
-def deploy(hosts, key_paths):
-    env.key_filename = key_path
-    env.hosts = hosts
-    with cd(code_dir):
+
+def deploy():
+
+   print env.key_filename
+   with cd(code_dir):
         sudo("git pull origin master")
-    restart_server()
+   restart_server()
 
 
 def virtualenv(command):
@@ -42,7 +44,7 @@ def update_dep():
 def update_db():
 
     with cd(code_dir):
-        run("source bin/activate && AtYourAge/manage.py migrate MainSite")
+        run("source ../bin/activate && /var/www/AtYourAge-webapp-env/AtYourAge-webapp/AtYourAgeWeb/AtYourAge/manage.py migrate EventApp")
 
 
 def hello():
