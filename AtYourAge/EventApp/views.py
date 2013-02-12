@@ -3,6 +3,8 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.core import serializers
 from django.db.models import F
+from django.views.decorators.csrf import csrf_exempt
+
 
 from datetime import datetime
 
@@ -17,6 +19,11 @@ def event(request, years, months, days):
     event = Event.objects.filter(age_years=years, age_months=months, age_days=days)
     response = serializers.serialize("json", event) 
     return HttpResponse(response)
+
+@csrf_exempt
+def test(request):
+    print request
+    return render_to_response("base.html")
 
 def event_with_birthday(request, fb_id, year, month, day):    
 
@@ -73,13 +80,31 @@ def story_with_birthday(request, fb_id, year, month, day):
 
     events = Event.objects.filter(age_years=years, age_months=months, age_days=days)
     event_list = []
+    print request.COOKIES 
+    formatted_cookie = request.COOKIES['Yardstick'].replace("'", "\"")
+    user_dict = json.loads(formatted_cookie)
 
-    access_token = request.COOKIES['Yardstick']
+    access_token = user_dict['token']
+    user_id = user_dict['activeUserId']
 
-    user_profile_pic = utils.person_profile_pic("me", access_token)
-    person_profile_pic = utils.figure_profile_pic(events[0])
+    person_profile_pic = utils.person_profile_pic(fb_id, access_token)
+    figure_profile_pic = utils.figure_profile_pic(events[0])
     print person_profile_pic
     event = events[0]
+    sex = "he"
+    if event.male == False:
+        sex = "she"
 
-    html = "<html><body><img src='%s'>HEY MAN %s %s <img src='%s'></body></html>" % (person_profile_pic['img_url'], event.name, event.description, user_profile_pic)
-    return HttpResponse(html)
+    info_dict = {'person_profile_pic' : person_profile_pic,
+            'figure_profile_pic' : figure_profile_pic['img_url'],
+            'figure_name' : event.name,
+            'age_years' : years,
+            'age_months' : months,
+            'age_days' : days,
+            'figure_sex' : sex,
+            'figure_event' : event.description,}
+
+
+
+
+    return render_to_response("base.html", info_dict)

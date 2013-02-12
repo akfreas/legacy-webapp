@@ -1,0 +1,29 @@
+<html>
+    <head>
+       <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-38054907-1']);
+      _gaq.push(['_trackPageview']);
+      _gaq.push(['_setDomainName', 'none']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+        </script> 
+    </head>
+    <body>
+        <img src="{{ person_profile_pic }}" style="float: left; padding: 2px">
+        {% if figure_profile_pic %}
+        <img src="{{ figure_profile_pic }}" style="float: right; padding: 2px">
+        {% endif %}
+        <p style="margin: 10px 10px;">
+        You are {{ age_years }} years, {{ age_months }} months, and {{ age_days }} days old.  You know, when {{ figure_name }} was your age, 
+        {{ figure_sex }} {{ figure_event }}. What did you do today?  You suck!  Get off your ass!
+        </p>
+    </body> 
+         
+</html>
