@@ -1,7 +1,6 @@
 https://www.djangoproject.com/download/1.5c1/tarball#egg=django
 Fabric==1.5.1
 Facebook==0.0
-MySQL-python==1.2.4
 Pygments==1.5
 South==0.7.6
 bpython==0.12
