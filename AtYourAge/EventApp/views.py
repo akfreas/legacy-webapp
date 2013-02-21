@@ -101,10 +101,14 @@ def story_with_birthday(request, fb_id, year, month, day):
             'age_years' : years,
             'age_months' : months,
             'age_days' : days,
-            'figure_sex' : sex,
+            'figure_pronoun' : sex,
             'figure_event' : event.description,}
 
+    response = json.dumps(info_dict)
+
+    return HttpResponse(response)
 
 
 
-    return render_to_response("base.html", info_dict)
+
+#    return render_to_response("base.html", info_dict)
