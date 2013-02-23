@@ -92,8 +92,11 @@ def story_with_birthday(request, fb_id, year, month, day):
     print person_profile_pic
     event = events[0]
     sex = "he"
+ 
     if event.male == False:
         sex = "she"
+   
+    description = "%s: %s years, %s months, and %s days old when %s %s" % (event.name, years, months, days, sex, event.description)
 
     info_dict = {'person_profile_pic' : person_profile_pic,
             'figure_profile_pic' : figure_profile_pic['img_url'],
@@ -102,7 +105,7 @@ def story_with_birthday(request, fb_id, year, month, day):
             'age_months' : months,
             'age_days' : days,
             'figure_pronoun' : sex,
-            'figure_event' : event.description,}
+            'figure_event' : description,}
 
     response = json.dumps(info_dict)
 
