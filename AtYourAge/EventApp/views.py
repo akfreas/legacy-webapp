@@ -96,7 +96,7 @@ def story_with_birthday(request, fb_id, year, month, day):
     if event.male == False:
         sex = "she"
    
-    description = "%s: %s years, %s months, and %s days old when %s %s" % (event.name, years, months, days, sex, event.description)
+    description = "%s" % (event.description.capitalize(),)
 
     info_dict = {'person_profile_pic' : person_profile_pic,
             'figure_profile_pic' : figure_profile_pic['img_url'],
