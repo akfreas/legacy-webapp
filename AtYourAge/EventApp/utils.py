@@ -72,6 +72,7 @@ def figure_wikipedia_pic(figure_name, image_size):
                     resized_url = "%s/%dpx-%s" % (formatted_url, image_size, image_title)
                     image_urls.append({'url' : resized_url, 'title' : image_title})
     else:
+        pass
 
     return image_urls
         
