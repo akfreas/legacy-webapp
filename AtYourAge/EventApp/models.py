@@ -11,7 +11,10 @@ class Event(models.Model):
     age_days = models.IntegerField()
 
 class EventUser(models.Model):
+
+    first_name = models.CharField(max_length=200)
+    last_name = models.CharField(max_length=200)
     facebook_id = models.CharField(max_length=200)
-    date_first_seen = models.DateField()
-    date_last_seen = models.DateField()
-    num_requests = models.IntegerField()
+    date_first_seen = models.DateField(null=True)
+    date_last_seen = models.DateField(null=True)
+    num_requests = models.IntegerField(null=True)

@@ -26,6 +26,8 @@ class EventAdmin(admin.ModelAdmin):
     readonly_fields = ("profile_pic",)
 
 class EventUserAdmin(admin.ModelAdmin):
+
+    list_display = ("facebook_id", "first_name", "last_name", "date_first_seen", "date_last_seen", "num_requests")
     pass
 
 admin.site.register(EventUser, EventUserAdmin)

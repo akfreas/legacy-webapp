@@ -106,10 +106,21 @@ def person_profile_pic(id, access_token=None):
 
     fb_object = graph.get_object(id, fields="picture")
 
-    print fb_object
+#    print fb_object
 
     picture_info = fb_object['picture']['data']
 
     if picture_info['is_silhouette'] == False:
         return picture_info['url']
 
+def populate_user_with_fb_fields(user,  access_token):
+
+    graph = facebook.GraphAPI(access_token)
+    fb_object = graph.get_object(user.facebook_id, fields="first_name,last_name")
+    print fb_object
+
+    try:
+        user.first_name = fb_object['first_name']
+        user.last_name = fb_object['last_name']
+    except KeyError:
+        pass

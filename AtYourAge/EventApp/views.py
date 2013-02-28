@@ -67,26 +67,33 @@ def story_with_birthday(request, fb_id, year, month, day):
     months = elapsed_time["months"]
     days = elapsed_time["days"]
 
-    try:
-        user = EventUser.objects.get(facebook_id=fb_id)
-    except EventUser.DoesNotExist:
-        user = EventUser(facebook_id=fb_id)
-        user.date_first_seen = datetime.now()
-
-    user.date_last_seen = datetime.now()
-    user.num_requests = 1
-    user.save()
-    
-
-    events = Event.objects.filter(age_years=years, age_months=months, age_days=days)
-    event_list = []
-    print request.COOKIES 
     formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
     user_dict = json.loads(formatted_cookie)
 
     access_token = user_dict['token']
     user_id = user_dict['activeUserId']
 
+
+    try:
+        user = EventUser.objects.get(facebook_id=fb_id)
+    except EventUser.DoesNotExist:
+        user = EventUser(facebook_id=fb_id)
+        user.date_first_seen = datetime.now()
+        utils.populate_user_with_fb_fields(user, access_token)
+        user.save()
+
+    try:
+        requesting_user = EventUser.objects.get(facebook_id=user_id)
+        requesting_user.date_last_seen = datetime.now()
+        requesting_user.num_requests = requesting_user.num_requests + 1
+        requesting_user.save()
+    except EventUser.DoesNotExist:
+        pass
+    
+
+    events = Event.objects.filter(age_years=years, age_months=months, age_days=days)
+    event_list = []
+    print request.COOKIES 
     event = events[0]
 
     person_profile_pic = utils.person_profile_pic(fb_id, access_token)
