@@ -37,20 +37,27 @@ def figure_wikipedia_pic(figure_name, image_size):
     wiki_page_json = requests.get("http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=revisions&rvprop=content&rvsection=0" % figure_name).json()
     wiki_page_json = str(wiki_page_json)
 
+    allowed_extensions = ['jpg', 'png']
 
     pages = wiki_json['query']['pages']
 #    import pdb; pdb.set_trace()
-    images = [pages[key] for key in pages.keys()][0]['images'] #flatten list, this might not work
-    first_image = None
-    if len(images) > 0:
-        for image_dict in images:
-            formatted_image_name = image_dict['title'].split(":")[1]
-            if string.find(wiki_page_json, formatted_image_name) > -1:
-                first_image = image_dict
+    try:
+        images = [pages[key] for key in pages.keys()][0]['images'] #flatten list, this might not work
+        first_image = None
+        if len(images) > 0:
+            for image_dict in images:
+                formatted_image_name = image_dict['title'].split(":")[1]
+                extension = formatted_image_name.split(".")[-1]
+                if string.find(wiki_page_json, formatted_image_name) > -1:
+                    first_image = image_dict
+        if first_image == None:
+            image_files = [image for image in images if image_dict['title'].split(".")[-1] in allowed_extensions]
+            if len(image_files) > 0:
+                first_image = image_files[0]
 
-    image_urls = []
+        print "FIRST IMAGE: %s"  % first_image
+        image_urls = []
 #    import pdb; pdb.set_trace()
-    if first_image != None:
         image_info = requests.get("http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=imageinfo&iiprop=url" % first_image['title']).json()
         image_query = image_info['query']
 
@@ -71,9 +78,8 @@ def figure_wikipedia_pic(figure_name, image_size):
                     formatted_url = "".join(url_split)
                     resized_url = "%s/%dpx-%s" % (formatted_url, image_size, image_title)
                     image_urls.append({'url' : resized_url, 'title' : image_title})
-    else:
-        pass
-
+    except KeyError:
+        image_urls = []
     return image_urls
         
 
