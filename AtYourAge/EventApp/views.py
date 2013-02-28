@@ -81,15 +81,23 @@ def story_with_birthday(request, fb_id, year, month, day):
     events = Event.objects.filter(age_years=years, age_months=months, age_days=days)
     event_list = []
     print request.COOKIES 
-    formatted_cookie = request.COOKIES['Yardstick'].replace("'", "\"")
+    formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
     user_dict = json.loads(formatted_cookie)
 
     access_token = user_dict['token']
     user_id = user_dict['activeUserId']
 
+    event = events[0]
+
     person_profile_pic = utils.person_profile_pic(fb_id, access_token)
-    figure_profile_pic = utils.figure_profile_pic(events[0])
-    print person_profile_pic
+    figure_profile_pic = utils.figure_profile_pic(event)
+    figure_wikipedia_pic = utils.figure_wikipedia_pic(event.name, 100)
+    print figure_wikipedia_pic
+    if len(figure_wikipedia_pic) > 0:
+        figure_wikipedia_pic = figure_wikipedia_pic[0]
+    else:
+        figure_wikipedia_pic = figure_profile_pic  #BAD STUFF MAN, HANDLE YOUR ERRORS
+
     event = events[0]
     sex = "he"
  
@@ -99,7 +107,7 @@ def story_with_birthday(request, fb_id, year, month, day):
     description = "%s" % (event.description.capitalize(),)
 
     info_dict = {'person_profile_pic' : person_profile_pic,
-            'figure_profile_pic' : figure_profile_pic['img_url'],
+            'figure_profile_pic' : figure_wikipedia_pic['url'],
             'figure_name' : event.name,
             'age_years' : years,
             'age_months' : months,
