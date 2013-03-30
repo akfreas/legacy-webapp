@@ -31,10 +31,14 @@ def get_age(year, month, day):
 def figure_wikipedia_pic(figure_name, image_size):
 
 
-    wiki_images_get = requests.get("http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=images" % figure_name)
+    wiki_images_url =  "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=images&redirects" % figure_name
+    print wiki_images_url
+    wiki_images_get = requests.get(wiki_images_url)
     wiki_json = wiki_images_get.json()
-
-    wiki_page_json = requests.get("http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=revisions&rvprop=content&rvsection=0" % figure_name).json()
+    wiki_page_url  = "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=revisions&rvprop=content&rvsection=0&redirects" % figure_name
+    print wiki_page_url
+    wiki_page_json = requests.get(wiki_page_url).json()
+    print 
     wiki_page_json = str(wiki_page_json)
 
     allowed_extensions = ['jpg', 'png']
