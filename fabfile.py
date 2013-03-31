@@ -4,8 +4,8 @@ from fabric.api import *
 from fabric.contrib.console import confirm
 from time import sleep
 
-code_dir = '/var/www/AtYourAge-webapp-env/AtYourAge-webapp'
-env.key_filename = "/Users/akfreas/Dropbox/sashimiblade/AppValve-deploy-data/private_keys/Alex-41.pem"
+code_dir = '/var/www/yardstick/current'
+env.key_filename = "/Users/akfreas/Dropbox/sashimiblade/AppValve-deploy-data/private_keys/Alex-47.pem"
 env.host_string = "ubuntu@atyourage.sashimiblade.com"
 
 
@@ -13,7 +13,7 @@ def deploy():
 
    print env.key_filename
    with cd(code_dir):
-        sudo("git pull origin master")
+        sudo("GIT_SSH=/home/ubuntu/ssh_git_wrapper.sh git pull origin master")
    restart_server()
 
 
