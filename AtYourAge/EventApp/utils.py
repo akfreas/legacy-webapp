@@ -4,6 +4,7 @@ from facebook import facebook
 import requests
 import string
 import json
+import re
 
 def get_age(year, month, day):
 
@@ -32,13 +33,23 @@ def figure_wikipedia_pic(figure_name, image_size):
 
 
     wiki_images_url =  "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=images&redirects" % figure_name
-    print wiki_images_url
     wiki_images_get = requests.get(wiki_images_url)
     wiki_json = wiki_images_get.json()
     wiki_page_url  = "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=revisions&rvprop=content&rvsection=0&redirects" % figure_name
-    print wiki_page_url
     wiki_page_json = requests.get(wiki_page_url).json()
-    print 
+    try:
+        redirect_array = wiki_page_json['query']['redirects']
+        redirect_name = redirect_array[0]['to']
+
+        wiki_images_url =  "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=images&redirects" % redirect_name
+        wiki_images_get = requests.get(wiki_images_url)
+        wiki_json = wiki_images_get.json()
+
+        wiki_page_url  = "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=revisions&rvprop=content&rvsection=0&redirects" % redirect_name
+        wiki_page_json = requests.get(wiki_page_url).json()
+    except KeyError:
+        pass
+
     wiki_page_json = str(wiki_page_json)
 
     allowed_extensions = ['jpg', 'png']
@@ -47,19 +58,19 @@ def figure_wikipedia_pic(figure_name, image_size):
 #    import pdb; pdb.set_trace()
     try:
         images = [pages[key] for key in pages.keys()][0]['images'] #flatten list, this might not work
+        print "Images: %s" % images
         first_image = None
         if len(images) > 0:
             for image_dict in images:
                 formatted_image_name = image_dict['title'].split(":")[1]
                 extension = formatted_image_name.split(".")[-1]
-                if string.find(wiki_page_json, formatted_image_name) > -1:
+                if re.search(formatted_image_name, wiki_page_json, re.IGNORECASE) != None:
                     first_image = image_dict
         if first_image == None:
             image_files = [image for image in images if image_dict['title'].split(".")[-1] in allowed_extensions]
             if len(image_files) > 0:
                 first_image = image_files[0]
 
-        print "FIRST IMAGE: %s"  % first_image
         image_urls = []
 #    import pdb; pdb.set_trace()
         image_info = requests.get("http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=imageinfo&iiprop=url" % first_image['title']).json()
@@ -83,6 +94,8 @@ def figure_wikipedia_pic(figure_name, image_size):
                     resized_url = "%s/%dpx-%s" % (formatted_url, image_size, image_title)
                     image_urls.append({'url' : resized_url, 'title' : image_title})
     except KeyError:
+        image_urls = []
+    except TypeError:
         image_urls = []
     return image_urls
         
