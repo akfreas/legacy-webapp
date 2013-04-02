@@ -33,19 +33,24 @@ def figure_wikipedia_pic(figure_name, image_size):
 
 
     wiki_images_url =  "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=images&redirects" % figure_name
+    print wiki_images_url
     wiki_images_get = requests.get(wiki_images_url)
     wiki_json = wiki_images_get.json()
     wiki_page_url  = "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=revisions&rvprop=content&rvsection=0&redirects" % figure_name
+    print wiki_page_url
     wiki_page_json = requests.get(wiki_page_url).json()
     try:
         redirect_array = wiki_page_json['query']['redirects']
         redirect_name = redirect_array[0]['to']
 
         wiki_images_url =  "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=images&redirects" % redirect_name
+        print "Redirected images url: %s" % wiki_images_url
         wiki_images_get = requests.get(wiki_images_url)
         wiki_json = wiki_images_get.json()
 
         wiki_page_url  = "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=revisions&rvprop=content&rvsection=0&redirects" % redirect_name
+
+        print "Redirected page url: %s" % wiki_page_url
         wiki_page_json = requests.get(wiki_page_url).json()
     except KeyError:
         pass
@@ -57,6 +62,7 @@ def figure_wikipedia_pic(figure_name, image_size):
     pages = wiki_json['query']['pages']
 #    import pdb; pdb.set_trace()
     try:
+        """
         images = [pages[key] for key in pages.keys()][0]['images'] #flatten list, this might not work
         print "Images: %s" % images
         first_image = None
@@ -73,7 +79,14 @@ def figure_wikipedia_pic(figure_name, image_size):
 
         image_urls = []
 #    import pdb; pdb.set_trace()
-        image_info = requests.get("http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=imageinfo&iiprop=url" % first_image['title']).json()
+        """
+        image_regex = re.compile(".*image\s*=\s*([a-zA-Z0-9_ ]*\.jpg|png)")
+        image_match = image_regex.match(wiki_page_json)
+        print "Image match: %s" % image_match.groups()[0]
+        first_image = image_match.groups()[0]
+        image_url = "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=File:%s&prop=imageinfo&iiprop=url" % first_image
+        print "Image url: %s" % image_url
+        image_info = requests.get(image_url).json()
         image_query = image_info['query']
 
         pages = image_query['pages']
@@ -94,8 +107,10 @@ def figure_wikipedia_pic(figure_name, image_size):
                     resized_url = "%s/%dpx-%s" % (formatted_url, image_size, image_title)
                     image_urls.append({'url' : resized_url, 'title' : image_title})
     except KeyError:
+        print "Hit keyerror."
         image_urls = []
     except TypeError:
+        print "Hit typeerror."
         image_urls = []
     return image_urls
         
