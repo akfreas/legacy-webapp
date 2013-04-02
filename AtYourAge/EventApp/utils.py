@@ -5,28 +5,15 @@ import requests
 import string
 import json
 import re
+from dateutil import relativedelta
 
 def get_age(year, month, day):
 
 
      now = datetime.now()
      birthday = datetime(year, month, day)
-
-     delta = now - birthday
-     days_delta = float(delta.days)
-
-     years_old = days_delta / 365.25
-     months_old = (years_old * 12) % 12
-     months_old_delta = years_old * 12
-     days_old = now.day - birthday.day 
-     if days_old < 0:
-         days_old = abs(days_old)
-         days_old = days_old + now.day
-     print months_old - floor(months_old)
-     print years_old, months_old, days_old
-     delta_list = map(int, map(floor, [years_old, months_old, days_old]))
-
-     ddict = {"years": delta_list[0], "months": delta_list[1], "days": delta_list[2]}
+     delta = relativedelta.relativedelta(now, birthday)
+     ddict = {"years": delta.years, "months": delta.months, "days": delta.days}
      return ddict 
 
 def figure_wikipedia_pic(figure_name, image_size):
@@ -80,32 +67,37 @@ def figure_wikipedia_pic(figure_name, image_size):
         image_urls = []
 #    import pdb; pdb.set_trace()
         """
-        image_regex = re.compile(".*image\s*=\s*([a-zA-Z0-9_ ]*\.jpg|png)")
+        image_regex = re.compile(".*image\s*=\s*([a-zA-Z0-9\-\._~:/?#\[\]@!$&'()*+,;= ]*\.jpg|png)")
         image_match = image_regex.match(wiki_page_json)
-        print "Image match: %s" % image_match.groups()[0]
-        first_image = image_match.groups()[0]
-        image_url = "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=File:%s&prop=imageinfo&iiprop=url" % first_image
-        print "Image url: %s" % image_url
-        image_info = requests.get(image_url).json()
-        image_query = image_info['query']
+        image_urls = []
+        if image_match == None:
+            image_urls = []
+        else:
+            print "Image match: %s" % image_match.groups()[0]
+            first_image = image_match.groups()[0]
+            image_url = "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=File:%s&prop=imageinfo&iiprop=url" % first_image
+            print "Image url: %s" % image_url
+            image_info = requests.get(image_url).json()
+            image_query = image_info['query']
 
-        pages = image_query['pages']
-        for page_key in pages.keys():
-            image_info_dict = {}
+            pages = image_query['pages']
+            for page_key in pages.keys():
+                image_info_dict = {}
 
-            if "title" in pages[page_key].keys():
-                raw_image_title = pages[page_key]["title"]
-                image_title = raw_image_title.split(":")[1].replace(" ", "_")
+                if "title" in pages[page_key].keys():
+                    raw_image_title = pages[page_key]["title"]
+                    image_title = raw_image_title.split(":")[1].replace(" ", "_")
 
-            if "imageinfo" in pages[page_key].keys():
-                imageinfo = pages[page_key]['imageinfo']
-                for info in imageinfo:
-                    info['url']
-                    url_split = info['url'].split("commons")
-                    url_split.insert(1, "commons/thumb")
-                    formatted_url = "".join(url_split)
-                    resized_url = "%s/%dpx-%s" % (formatted_url, image_size, image_title)
-                    image_urls.append({'url' : resized_url, 'title' : image_title})
+                if "imageinfo" in pages[page_key].keys():
+                    imageinfo = pages[page_key]['imageinfo']
+                    for info in imageinfo:
+                        info['url']
+                        url_split = info['url'].split("commons")
+                        url_split.insert(1, "commons/thumb")
+                        formatted_url = "".join(url_split)
+                        resized_url = "%s/%dpx-%s" % (formatted_url, image_size, image_title)
+                        image_urls.append({'url' : resized_url, 'title' : image_title})
+
     except KeyError:
         print "Hit keyerror."
         image_urls = []
