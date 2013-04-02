@@ -67,18 +67,21 @@ def figure_wikipedia_pic(figure_name, image_size):
         image_urls = []
 #    import pdb; pdb.set_trace()
         """
-        image_regex = re.compile(".*image\s*=\s*([a-zA-Z0-9\-\._~:/?#\[\]@!$&'()*+,;= ]*\.jpg|png)")
+        image_regex = re.compile(".*(image|image_name)\s*=\s*(?P<imagename>[a-zA-Z0-9\-\._~:/?#\[\]@!$&'()*+,;= ]*\.(?P<image_extension>jpg|png|gif))")
         image_match = image_regex.match(wiki_page_json)
         image_urls = []
         if image_match == None:
             image_urls = []
         else:
-            print "Image match: %s" % image_match.groups()[0]
-            first_image = image_match.groups()[0]
+            print "Image match: %s" % image_match.groupdict()['imagename']
+            match_dict = image_match.groupdict()
+            first_image = match_dict['imagename']
+
             image_url = "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=File:%s&prop=imageinfo&iiprop=url" % first_image
             print "Image url: %s" % image_url
             image_info = requests.get(image_url).json()
             image_query = image_info['query']
+            print "Image info: %s" % str(image_info)
 
             pages = image_query['pages']
             for page_key in pages.keys():
@@ -91,12 +94,15 @@ def figure_wikipedia_pic(figure_name, image_size):
                 if "imageinfo" in pages[page_key].keys():
                     imageinfo = pages[page_key]['imageinfo']
                     for info in imageinfo:
-                        info['url']
-                        url_split = info['url'].split("commons")
-                        url_split.insert(1, "commons/thumb")
-                        formatted_url = "".join(url_split)
-                        resized_url = "%s/%dpx-%s" % (formatted_url, image_size, image_title)
-                        image_urls.append({'url' : resized_url, 'title' : image_title})
+                        if match_dict['image_extension'] != 'gif':
+                            info['url']
+                            url_split = info['url'].split("commons")
+                            url_split.insert(1, "/commons/thumb")
+                            formatted_url = "".join(url_split)
+                            resized_url = "%s/%dpx-%s" % (formatted_url, image_size, image_title)
+                            image_urls.append({'url' : resized_url, 'title' : image_title})
+                        else:
+                            image_urls.append({'url' : info['url'], 'title' : 'dummy title'})
 
     except KeyError:
         print "Hit keyerror."
