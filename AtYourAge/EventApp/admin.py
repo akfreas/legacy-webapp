@@ -21,7 +21,7 @@ class EventAdmin(admin.ModelAdmin):
 
     profile_pic.allow_tags = True
 
-    list_display = ("name", "description", "age_years", "age_months", "age_days", "male")
+    list_display = ("name", "description", "age_years", "age_months", "age_days", "male", "image_url")
     list_filter = ("male",)
     readonly_fields = ("profile_pic",)
 
