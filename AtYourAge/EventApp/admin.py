@@ -21,9 +21,17 @@ class EventAdmin(admin.ModelAdmin):
 
     profile_pic.allow_tags = True
 
-    list_display = ("name", "description", "age_years", "age_months", "age_days", "male", "image_url")
+    list_display = ("figure", "description", "age_years", "age_months", "age_days", "male")
     list_filter = ("male",)
     readonly_fields = ("profile_pic",)
+
+admin.site.register(Event, EventAdmin)
+
+class FigureAdmin(admin.ModelAdmin):
+
+    list_display = ("name", "image_url")
+
+admin.site.register(Figure, FigureAdmin)
 
 class EventUserAdmin(admin.ModelAdmin):
 
@@ -32,4 +40,3 @@ class EventUserAdmin(admin.ModelAdmin):
 
 admin.site.register(EventUser, EventUserAdmin)
 
-admin.site.register(Event, EventAdmin)

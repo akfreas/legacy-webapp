@@ -2,8 +2,16 @@ from django.conf import settings
 from django.db import models
 
 
-class Event(models.Model):
+class Figure(models.Model):
+
+    def __unicode__(self):
+        return self.name
+
     name = models.CharField(max_length=100)
+    image_url = models.URLField(blank=True)
+
+class Event(models.Model):
+    figure = models.ForeignKey("Figure", null=True)
     description = models.CharField(max_length=254)
     male = models.BooleanField()
     age_years = models.IntegerField()

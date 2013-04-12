@@ -21,7 +21,7 @@ class Migration(SchemaMigration):
         db.send_create_signal(u'EventApp', ['Event'])
 
         from django.core.management import call_command
-        call_command("loaddata", "fixtures/initial_data.json")
+        call_command("loaddata", "EventApp/fixtures/base_data.json")
 
         # Adding model 'EventUser'
         db.create_table(u'EventApp_eventuser', (
