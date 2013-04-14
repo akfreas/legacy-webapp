@@ -122,6 +122,23 @@ def figure_wikipedia_pic(figure_name, image_height):
     if len(image_urls) > 0:
         return image_urls[0]
 
+def figure_freebase_pic(figure_name, image_height):
+
+    formatted_name = figure_name.lower().replace(" ", "_")
+    api_key = "AIzaSyDN15Pi0PJpqnNlM64xiE65yW9shiZ2A1I"
+    url = "https://www.googleapis.com/freebase/v1/topic/en/%s?key=%s&filter/common/topic/image&limit=1" % (formatted_name, api_key)
+    
+#    import pdb;pdb.set_trace()
+
+    img_request = requests.get(url).json()
+    if "error" not in img_request.keys():
+        img_id = img_request['id']
+        url = "https://usercontent.googleapis.com/freebase/v1/image%s?maxwidth=%s" % (img_id, image_height)
+        return url
+    else:
+        return None
+
+
         
 
 def figure_fb_profile_pic(figure_name, image_height):
@@ -143,7 +160,7 @@ def figure_fb_profile_pic(figure_name, image_height):
 
 def figure_pic_href(name, size):
 
-    fetch_functions = [figure_wikipedia_pic, figure_fb_profile_pic]
+    fetch_functions = [figure_freebase_pic, figure_wikipedia_pic]
     image_url = None
 
     print "Finding picture for %s" % name
@@ -159,7 +176,7 @@ def figure_pic_href(name, size):
 
 def import_data_to_s3(num_import):
 
-    content_map = {'image/jpeg' : 'jpg', 'image/png' : 'png', 'image/jpg' : 'jpg'}
+    content_map = {'image/jpeg' : 'jpg', 'image/png' : 'png', 'image/jpg' : 'jpg', 'image/gif' : 'gif'}
 
     from boto.s3.connection import S3Connection
     from boto.s3.key import Key
@@ -168,26 +185,35 @@ def import_data_to_s3(num_import):
     conn = S3Connection(aws_access_key_id="AKIAIS5NHCFOO3QE6GNQ", aws_secret_access_key="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")
     bucket = conn.get_bucket("atyourage-images")
 
-    events = Event.objects.filter(image_url="")[:num_import]
+    figures = Figure.objects.filter(image_url="")[:num_import]
+
     
     temp_dir = mkdtemp()
     
 
     counter = 0;
+    #import pdb; pdb.set_trace()
 
-    for event in events:
+    from facebook.facebook import GraphAPIError
 
-        pic_url = figure_pic_href(event.name, 200)
+    for figure in figures:
+
+        try:
+            pic_url = figure_pic_href(figure.name, 200)
+        except GraphAPIError:
+            pic_url = None
+            
+        print figure
 
         if pic_url != None:
 
             print "Pulling from %s." % pic_url
 
             pic_hash = md5(pic_url).hexdigest()
-            pic_request = requests.get(pic_url)
-            
+            pic_request = requests.get(pic_url, verify=False)
+            content_type = pic_request.headers['content-type']
 
-            if "image" in pic_request.headers['content-type']:
+            if "image" in content_type:
 
                 pic_filename = temp_dir + "/" + pic_hash
                 pic_fp = open(pic_filename, "w")
@@ -204,7 +230,7 @@ def import_data_to_s3(num_import):
                     print "Resizing to %s" % new_size
 
                     new_image = image.resize(new_size)
-                    pic_filename += ".jpg"
+                    pic_filename += "." + content_map[content_type]
                     new_image.save(pic_filename)
 
                 pic_fp = open(pic_filename, "r")
@@ -216,23 +242,38 @@ def import_data_to_s3(num_import):
 
                 s3_pic_url = "http://%s.s3.amazonaws.com/%s" % (bucket.name, s3_pic_key.md5)
 
-                event.image_url = s3_pic_url
-                event.save()
-
+                figure.image_url = s3_pic_url
+                figure.save()
                 counter += 1
+
+            else:
+                figure.image_url = "not_found"
+                figure.save()
+
+        else:
+            figure.image_url = "not_found"
+            figure.save()
 
 
 
     print "%d events out of %d updated with url." % (counter, num_import)
 
          
+def import_until_done():
+    
+    from facebook.facebook import GraphAPIError
 
-            
+    figures_nopic = Figure.objects.filter(image_url="")
 
 
+    while figures_nopic.count() > 100:
 
-
-
+        #import pdb; pdb.set_trace()
+        try:
+            import_data_to_s3(100)
+        except GraphAPIError:
+            pass
+        figures_nopic = Figure.objects.filter(image_url="")
 
 
 

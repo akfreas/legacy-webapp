@@ -29,7 +29,11 @@ admin.site.register(Event, EventAdmin)
 
 class FigureAdmin(admin.ModelAdmin):
 
-    list_display = ("name", "image_url")
+    def profile_pic(self, obj):
+        return "<img src='%s' height='100'>" % obj.image_url
+
+    profile_pic.allow_tags = True
+    list_display = ("name", "image_url", "profile_pic")
 
 admin.site.register(Figure, FigureAdmin)
 
