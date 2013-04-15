@@ -85,26 +85,22 @@ def story_with_birthday(request, fb_id, year, month, day):
     try:
         requesting_user = EventUser.objects.get(facebook_id=user_id)
         requesting_user.date_last_seen = datetime.now()
-        requesting_user.num_requests = requesting_user.num_requests + 1
+
+        if requesting_user.num_requests != None:
+            requesting_user.num_requests = requesting_user.num_requests + 1
+        else:
+            requesting_user.num_requests = 1
+
         requesting_user.save()
     except EventUser.DoesNotExist:
         pass
     
 
+    person_profile_pic = utils.person_profile_pic(fb_id, access_token)
     events = Event.objects.filter(age_years=years, age_months=months, age_days=days)
     event_list = []
     print request.COOKIES 
     event = events[0]
-
-    person_profile_pic = utils.person_profile_pic(fb_id, access_token)
-    figure_profile_pic = utils.figure_profile_pic(event)
-    figure_wikipedia_pic = utils.figure_wikipedia_pic(event.name, 200)
-    print figure_wikipedia_pic
-    if len(figure_wikipedia_pic) > 0:
-        figure_wikipedia_pic = figure_wikipedia_pic[0]
-    else:
-        figure_wikipedia_pic = figure_profile_pic  #BAD STUFF MAN, HANDLE YOUR ERRORS
-
     event = events[0]
     sex = "he"
  
@@ -114,8 +110,8 @@ def story_with_birthday(request, fb_id, year, month, day):
     description = "%s%s" % (event.description[0].capitalize(), event.description[1:])
 
     info_dict = {'person_profile_pic' : person_profile_pic,
-            'figure_profile_pic' : figure_wikipedia_pic['url'],
-            'figure_name' : event.name,
+            'figure_profile_pic' : event.figure.image_url,
+            'figure_name' : event.figure.name,
             'age_years' : years,
             'age_months' : months,
             'age_days' : days,

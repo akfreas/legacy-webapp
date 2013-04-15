@@ -229,9 +229,17 @@ def import_data_to_s3(num_import):
 
                     print "Resizing to %s" % new_size
 
-                    new_image = image.resize(new_size)
+                    try:
+
+                        new_image = image.resize(new_size)
+                        new_image.save(pic_filename)
+                    except IOError:
+
+                        figure.image_url = "not_found"
+                        figure.save()
+                        break
+
                     pic_filename += "." + content_map[content_type]
-                    new_image.save(pic_filename)
 
                 pic_fp = open(pic_filename, "r")
 
