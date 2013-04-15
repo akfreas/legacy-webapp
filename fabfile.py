@@ -25,16 +25,16 @@ def virtualenv(command):
 def restart_server():
 
     stopserver()
-    sleep(10)
+    sleep(5)
     startserver()
 
 def startserver():
     sudo("nginx")
-    sudo("/usr/local/bin/supervisord")
+    sudo("supervisord")
 
 def stopserver():
     sudo("killall nginx")
-    sudo("killall -s 1 supervisord")
+    sudo("killall supervisord")
 
 def update_dep():
     with cd(code_dir):
@@ -44,7 +44,7 @@ def update_dep():
 def update_db():
 
     with cd(code_dir):
-        run("source ../bin/activate && /var/www/AtYourAge-webapp-env/AtYourAge-webapp/AtYourAgeWeb/AtYourAge/manage.py migrate EventApp")
+        run("source bin/activate && AtYourAge/manage.py migrate EventApp")
 
 
 def hello():
