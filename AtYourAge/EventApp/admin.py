@@ -20,6 +20,7 @@ class EventAdmin(admin.ModelAdmin):
             return "<img src=''>"
 
     profile_pic.allow_tags = True
+    search_fields = ["figure__name"]
 
     list_display = ("figure", "description", "age_years", "age_months", "age_days", "male")
     list_filter = ("male",)
@@ -32,6 +33,7 @@ class FigureAdmin(admin.ModelAdmin):
     def profile_pic(self, obj):
         return "<img src='%s' height='100'>" % obj.image_url
 
+    search_fields = ["name"]
     profile_pic.allow_tags = True
     list_display = ("name", "image_url", "profile_pic")
 
