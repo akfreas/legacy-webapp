@@ -20,8 +20,9 @@ class Event(models.Model):
 
 class EventUser(models.Model):
 
-    first_name = models.CharField(max_length=200)
-    last_name = models.CharField(max_length=200)
+    first_name = models.CharField(max_length=200, blank=True, null=True)
+    last_name = models.CharField(max_length=200, blank=True, null=True)
+    birthday = models.DateField(blank=True, null=True)
     facebook_id = models.CharField(max_length=200)
     date_first_seen = models.DateField(null=True)
     date_last_seen = models.DateField(null=True)

@@ -1,5 +1,5 @@
 from django.template import RequestContext, loader
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http.response import *
 from django.shortcuts import render_to_response
 from django.core import serializers
 from django.db.models import F
@@ -25,57 +25,46 @@ def test(request):
     print request
     return render_to_response("base.html")
 
-def event_with_birthday(request, fb_id, year, month, day):    
-
-    elapsed_time = utils.get_age(int(year), int(month), int(day))
-
-    years = elapsed_time["years"]
-    months = elapsed_time["months"]
-    days = elapsed_time["days"]
+@csrf_exempt
+def update_birthday(request, user_id):
+    post = request.body
+    print "xxxx POST " + str(post) + " kkkk " + user_id
+#    import pdb; pdb.set_trace()
+    body_dict = json.loads(post)
+    bday = datetime.strptime(body_dict['birthday'], "%Y/%m/%d")
 
     try:
-        user = EventUser.objects.get(facebook_id=fb_id)
-    except EventUser.DoesNotExist:
-        user = EventUser(facebook_id=fb_id)
-        user.date_first_seen = datetime.now()
+        user = EventUser.objects.get(facebook_id=user_id)
+    except EventUser.DoesNotExist as e:
+        user = EventUser(facebook_id=user_id)
 
-    user.date_last_seen = datetime.now()
-    user.num_requests = 1
+
+    user.birthday = bday
     user.save()
-    
 
-    events = Event.objects.filter(age_years=years, age_months=months, age_days=days)
-    event_list = []
-    for event in events: 
-        response_dict = {'age_years' : event.age_years, 
-                'age_months' : event.age_months,
-                'age_days' : event.age_days,
-                'male' : event.male,
-                'description' : event.description,
-                'name' : event.name,
-                'story_html'  :"<html><body>HEY MAN</body></html>" }
-        event_list.append(response_dict)
-    response = json.dumps(event_list)
+    return HttpResponse(content="User saved")
 
-    return HttpResponse(response)
+def story_with_birthday(request, fb_id ):
 
-def story_with_birthday(request, fb_id, year, month, day):
+    try:
 
-    elapsed_time = utils.get_age(int(year), int(month), int(day))
+        formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
+        user_dict = json.loads(formatted_cookie)
 
-    years = elapsed_time["years"]
-    months = elapsed_time["months"]
-    days = elapsed_time["days"]
-
-    formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
-    user_dict = json.loads(formatted_cookie)
-
-    access_token = user_dict['token']
-    user_id = user_dict['activeUserId']
+        access_token = user_dict['token']
+        user_id = user_dict['activeUserId']
+    except KeyError:
+        access_token = ""
+        user_id = ""
 
 
     try:
         user = EventUser.objects.get(facebook_id=fb_id)
+
+        if user.first_name == None or user.last_name == None:
+            utils.populate_user_with_fb_fields(user, access_token)
+            user.save()
+
     except EventUser.DoesNotExist:
         user = EventUser(facebook_id=fb_id)
         user.date_first_seen = datetime.now()
@@ -94,12 +83,19 @@ def story_with_birthday(request, fb_id, year, month, day):
         requesting_user.save()
     except EventUser.DoesNotExist:
         pass
-    
+
+    bday = user.birthday
+ 
+    elapsed_time = utils.get_age(bday.year, bday.month, bday.day)
+
+    years = elapsed_time["years"]
+    months = elapsed_time["months"]
+    days = elapsed_time["days"]
+   
 
     person_profile_pic = utils.person_profile_pic(fb_id, access_token)
     events = Event.objects.filter(age_years=years, age_months=months, age_days=days)
     event_list = []
-    print request.COOKIES 
     event = events[0]
     event = events[0]
     sex = "he"
@@ -119,6 +115,8 @@ def story_with_birthday(request, fb_id, year, month, day):
             'figure_event' : description,}
 
     response = json.dumps(info_dict)
+
+    print response
 
     return HttpResponse(response)
 

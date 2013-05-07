@@ -303,11 +303,12 @@ def person_profile_pic(id, access_token=None):
 def populate_user_with_fb_fields(user,  access_token):
 
     graph = facebook.GraphAPI(access_token)
-    fb_object = graph.get_object(user.facebook_id, fields="first_name,last_name")
+    fb_object = graph.get_object(user.facebook_id, fields="first_name,last_name,birthday")
     print fb_object
 
     try:
         user.first_name = fb_object['first_name']
         user.last_name = fb_object['last_name']
-    except KeyError:
-        pass
+        user.birthday = datetime.strptime(fb_object['birthday'], "%m/%d/%Y")
+    except KeyError as e:
+        print e.message
