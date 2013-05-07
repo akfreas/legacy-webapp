@@ -11,5 +11,7 @@ urlpatterns = patterns('EventApp.views',
      url(r'^(\d*)/event/elapsed/(\d{1,2})/(\d{1,2})/(\d{1,2})', 'event'), 
      url(r'^user/(\d*)/story', 'story_with_birthday'),
 
+     url(r'event/(\d*)/related', 'related_events'),
+
      url(r'^user/(\d*)/update_birthday', 'update_birthday'),
 )

@@ -44,6 +44,41 @@ def update_birthday(request, user_id):
 
     return HttpResponse(content="User saved")
 
+def create_simple_error(message):
+
+    return "{'error' : '%s'}" % message
+
+def related_events(request, event_id):
+
+    try:
+        the_event = Event.objects.get(id=event_id)
+        events = Event.objects.filter(figure=the_event.figure)
+    except Event.DoesNotExist:
+        return HttpResponse(content=create_simple_error("Could not find related event for event with id %s" % event_id))
+
+  
+    event_arr = []
+
+    for event in events:
+
+        e_dict = {'description' : event.description,
+                 'age_days' : event.age_days,
+                 'age_months' : event.age_months,
+                 'age_years' : event.age_years,
+                 }
+        event_arr.append(e_dict)
+
+    ret_val = {'parent_id' : event_id,
+               'events' : event_arr
+               }
+ 
+
+    json_string = json.dumps(ret_val)
+
+    return HttpResponse(content=json_string, content_type="application/json")
+
+        
+
 def story_with_birthday(request, fb_id ):
 
     try:
@@ -112,7 +147,8 @@ def story_with_birthday(request, fb_id ):
             'age_months' : months,
             'age_days' : days,
             'figure_pronoun' : sex,
-            'figure_event' : description,}
+            'figure_event' : description,
+            'event_id' : event.id }
 
     response = json.dumps(info_dict)
 
