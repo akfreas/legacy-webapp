@@ -28,8 +28,6 @@ def test(request):
 @csrf_exempt
 def update_birthday(request, user_id):
     post = request.body
-    print "xxxx POST " + str(post) + " kkkk " + user_id
-#    import pdb; pdb.set_trace()
     body_dict = json.loads(post)
     bday = datetime.strptime(body_dict['birthday'], "%Y/%m/%d")
 
@@ -52,7 +50,7 @@ def related_events(request, event_id):
 
     try:
         the_event = Event.objects.get(id=event_id)
-        events = Event.objects.filter(figure=the_event.figure)
+        events = Event.objects.filter(figure=the_event.figure).exclude(id=the_event.id)
     except Event.DoesNotExist:
         return HttpResponse(content=create_simple_error("Could not find related event for event with id %s" % event_id))
 
@@ -61,7 +59,9 @@ def related_events(request, event_id):
 
     for event in events:
 
-        e_dict = {'description' : event.description,
+        description = "%s%s" % (event.description[0].upper(), event.description[1:])
+
+        e_dict = {'description' : description,
                  'age_days' : event.age_days,
                  'age_months' : event.age_months,
                  'age_years' : event.age_years,
@@ -96,19 +96,23 @@ def story_with_birthday(request, fb_id ):
     try:
         user = EventUser.objects.get(facebook_id=fb_id)
 
-        if user.first_name == None or user.last_name == None:
+        if user.first_name == None or user.last_name == None or user.birthday == None:
             utils.populate_user_with_fb_fields(user, access_token)
             user.save()
 
     except EventUser.DoesNotExist:
         user = EventUser(facebook_id=fb_id)
-        user.date_first_seen = datetime.now()
+        user.date_added = datetime.now()
         utils.populate_user_with_fb_fields(user, access_token)
         user.save()
 
     try:
         requesting_user = EventUser.objects.get(facebook_id=user_id)
         requesting_user.date_last_seen = datetime.now()
+
+        if user.id != requesting_user.id:
+            user.added_by.add(requesting_user)
+            user.save()
 
         if requesting_user.num_requests != None:
             requesting_user.num_requests = requesting_user.num_requests + 1
@@ -118,7 +122,6 @@ def story_with_birthday(request, fb_id ):
         requesting_user.save()
     except EventUser.DoesNotExist:
         pass
-
     bday = user.birthday
  
     elapsed_time = utils.get_age(bday.year, bday.month, bday.day)
@@ -152,11 +155,5 @@ def story_with_birthday(request, fb_id ):
 
     response = json.dumps(info_dict)
 
-    print response
-
     return HttpResponse(response)
 
-
-
-
-#    return render_to_response("base.html", info_dict)

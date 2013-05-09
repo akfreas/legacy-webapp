@@ -41,7 +41,7 @@ admin.site.register(Figure, FigureAdmin)
 
 class EventUserAdmin(admin.ModelAdmin):
 
-    list_display = ("facebook_id", "first_name", "last_name", "date_first_seen", "date_last_seen", "num_requests")
+    list_display = ("facebook_id", "first_name", "last_name", "date_first_seen", "date_last_seen", "date_added", "num_requests")
     pass
 
 admin.site.register(EventUser, EventUserAdmin)

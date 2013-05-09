@@ -312,7 +312,9 @@ def populate_user_with_fb_fields(user,  access_token):
         try:
             user.birthday = datetime.strptime(fb_object['birthday'], "%m/%d/%Y")
         except ValueError:
+            print "User birthday not found: %s" % fb_object
             user.birthday = None
 
     except KeyError as e:
+        print "User birthday not found: %s" % fb_object
         print e.message
