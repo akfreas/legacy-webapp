@@ -60,7 +60,7 @@ def related_events(request, event_id):
         user_id = ""
 
     requesting_user = EventUser.objects.get(facebook_id=user_id)
-    requesting_user.num_requests + requesting_user.num_requests 1;
+    requesting_user.num_requests = requesting_user.num_requests + 1;
     requesting_user.save()
 
     try:
