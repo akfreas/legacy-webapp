@@ -49,6 +49,21 @@ def create_simple_error(message):
 def related_events(request, event_id):
 
     try:
+
+        formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
+        user_dict = json.loads(formatted_cookie)
+
+        access_token = user_dict['token']
+        user_id = user_dict['activeUserId']
+    except KeyError:
+        access_token = ""
+        user_id = ""
+
+    requesting_user = EventUser.objects.get(facebook_id=user_id)
+    requesting_user.num_requests + requesting_user.num_requests 1;
+    requesting_user.save()
+
+    try:
         the_event = Event.objects.get(id=event_id)
         events = Event.objects.filter(figure=the_event.figure).exclude(id=the_event.id)
     except Event.DoesNotExist:
