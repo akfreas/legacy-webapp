@@ -65,7 +65,7 @@ def related_events(request, event_id):
 
     try:
         the_event = Event.objects.get(id=event_id)
-        events = Event.objects.filter(figure=the_event.figure).exclude(id=the_event.id)
+        events = Event.objects.filter(figure=the_event.figure)
     except Event.DoesNotExist:
         return HttpResponse(content=create_simple_error("Could not find related event for event with id %s" % event_id))
 
@@ -80,7 +80,11 @@ def related_events(request, event_id):
                  'age_days' : event.age_days,
                  'age_months' : event.age_months,
                  'age_years' : event.age_years,
+                 'is_self' : False,
                  }
+        if event.id == int(event_id):
+            e_dict['is_self'] = True
+
         event_arr.append(e_dict)
 
     ret_val = {'parent_id' : event_id,

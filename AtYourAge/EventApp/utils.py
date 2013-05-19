@@ -291,8 +291,6 @@ def person_profile_pic(id, access_token=None):
 
     fb_object = graph.get_object(id, fields="picture")
 
-#    print fb_object
-
     picture_info = fb_object['picture']['data']
 
     if picture_info['is_silhouette'] == False:
