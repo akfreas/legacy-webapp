@@ -9,9 +9,9 @@ class Figure(models.Model):
 
     name = models.CharField(max_length=100)
     image_url = models.URLField(blank=True)
-    description = models.TextField(blank=True)
-    date_of_birth = models.DateField(blank=True)
-    date_of_death = models.DateField(blank=True)
+    description = models.TextField(blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    date_of_death = models.DateField(blank=True, null=True)
 
 class Event(models.Model):
     figure = models.ForeignKey("Figure", null=True)
