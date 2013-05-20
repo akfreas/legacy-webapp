@@ -12,6 +12,7 @@ from EventApp.models import *
 from EventApp import settings
 
 import json
+import urllib
 
 import utils
 
@@ -100,6 +101,7 @@ def related_events(request, event_id):
 
 def story_with_birthday(request, fb_id ):
 
+#    import pdb; pdb.set_trace()
     try:
 
         formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
@@ -164,6 +166,7 @@ def story_with_birthday(request, fb_id ):
 
     info_dict = {'person_profile_pic' : person_profile_pic,
             'figure_profile_pic' : event.figure.image_url,
+            'figure_id' : event.figure.id,
             'figure_name' : event.figure.name,
             'age_years' : years,
             'age_months' : months,
@@ -175,4 +178,25 @@ def story_with_birthday(request, fb_id ):
     response = json.dumps(info_dict)
 
     return HttpResponse(response)
+
+def figure_info(request, figure_id):
+
+    try:
+        figure = Figure.objects.get(id=figure_id)
+    except Figure.DoesNotExist:
+        return HttpResponse(content=create_simple_error("Figure with id %s does not exist." % figure_id))
+
+
+#    [figure_dict.__setitem__(key, figure.__getattribute__(key).encode('utf-8')) for key in figure._meta.get_all_field_names() if key != "event"]
+
+    figure_dict = {'name' : figure.name,
+            'image_url' : figure.image_url,
+            'description' : figure.description.encode('utf-8'),
+            'date_of_birth' : figure.date_of_birth.strftime("%m/%d/%Y"),
+            'date_of_death' : figure.date_of_death.strftime("%m/%d/%Y"),
+    }
+
+    json_string = json.dumps(figure_dict)
+
+    return HttpResponse(content=json_string)
 

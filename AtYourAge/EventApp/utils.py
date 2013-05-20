@@ -139,6 +139,47 @@ def figure_freebase_pic(figure_name, image_height):
         return None
 
 
+def populate_figure_datapoints(figure):
+
+    formatted_name = figure.name.lower().replace(" ", "_")
+    api_key = "AIzaSyDN15Pi0PJpqnNlM64xiE65yW9shiZ2A1I"
+    url = "https://www.googleapis.com/freebase/v1/topic/en/%s?key=%s&limit=1" % (formatted_name, api_key)
+
+    try:
+        full_json = requests.get(url).json()['property']
+    except KeyError:
+        return
+
+    try:
+        print full_json.keys()
+
+        dob_parse = lambda x: x['values'][0]['text']
+        dod_parse =  dob_parse
+        desc_parse = lambda x: x['values'][0]['value']
+
+        parsers = {'/common/topic/description' : desc_parse,
+                '/people/person/date_of_birth'  : dob_parse,
+                '/people/deceased_person/date_of_death' : dod_parse}
+
+        keymap = {'/common/topic/description' : 'description', 
+                '/people/person/date_of_birth' : 'date_of_birth', 
+                '/people/deceased_person/date_of_death' : 'date_of_death'} 
+
+        keys = keymap.keys()
+
+        available_keys = [key for key in full_json.keys() if key in keys]
+
+        for k in available_keys:
+            property_name = keymap[k]
+            parser = parsers[k]
+            print full_json[k]
+            figure.__setattr__(property_name, parser(full_json[k]))
+
+        figure.save()
+    except:
+        print "Could not populate record for %s." % figure.name
+
+
         
 
 def figure_fb_profile_pic(figure_name, image_height):

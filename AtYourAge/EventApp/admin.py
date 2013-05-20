@@ -35,7 +35,7 @@ class FigureAdmin(admin.ModelAdmin):
 
     search_fields = ["name"]
     profile_pic.allow_tags = True
-    list_display = ("name", "image_url", "profile_pic")
+    list_display = ("name", "image_url", "profile_pic", "date_of_birth", "date_of_death")
 
 admin.site.register(Figure, FigureAdmin)
 
