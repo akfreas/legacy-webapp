@@ -189,12 +189,24 @@ def figure_info(request, figure_id):
 
 #    [figure_dict.__setitem__(key, figure.__getattribute__(key).encode('utf-8')) for key in figure._meta.get_all_field_names() if key != "event"]
 
+    keys = ['name', 'image_url', 'description', 'date_of_birth', 'date_of_death']
+
+
     figure_dict = {'name' : figure.name,
             'image_url' : figure.image_url,
-            'description' : figure.description.encode('utf-8'),
-            'date_of_birth' : figure.date_of_birth.strftime("%m/%d/%Y"),
-            'date_of_death' : figure.date_of_death.strftime("%m/%d/%Y"),
+            'description' : "",
+            'date_of_birth' : "",
+            'date_of_death' : "",
     }
+
+    if figure.date_of_birth != None:
+        figure_dict['date_of_birth'] = figure.date_of_birth.strftime("%m/%d/%Y")
+    if figure.date_of_death != None:
+        figure_dict['date_of_death'] = figure.date_of_death.strftime("%m/%d/%Y")
+
+    if figure.description != None:
+        figure_dict['description'] = figure.description.encode('utf-8')
+
 
     json_string = json.dumps(figure_dict)
 
