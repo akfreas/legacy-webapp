@@ -22,19 +22,16 @@ def virtualenv(command):
         sudo(env.activate + '&&' + command, user=env.deploy_user)
 
 
-def restart_server():
-
-    stopserver()
-    sleep(5)
-    startserver()
-
 def startserver():
     sudo("nginx")
     sudo("supervisord")
 
 def stopserver():
-    sudo("killall nginx")
-    sudo("killall supervisord")
+    sudo("nginx -s stop")
+    sudo("supervisorctl restart all")
+
+def restart_server():
+    sudo("supervisorctl restart all")
 
 def update_dep():
     with cd(code_dir):

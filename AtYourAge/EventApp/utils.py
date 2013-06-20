@@ -1,6 +1,6 @@
 from datetime import datetime
 from math import floor
-from facebook import facebook
+from facebook import GraphAPI
 import requests
 import string
 import json
@@ -183,7 +183,7 @@ def populate_figure_datapoints(figure):
         
 
 def figure_fb_profile_pic(figure_name, image_height):
-    graph_obj = facebook.GraphAPI()
+    graph_obj = GraphAPI()
     results = graph_obj.get_object("search", q=figure_name, type="page")
     print results
 
@@ -328,7 +328,7 @@ def import_until_done():
 
 def person_profile_pic(id, access_token=None):
 
-    graph = facebook.GraphAPI(access_token)
+    graph = GraphAPI(access_token)
 
     fb_object = graph.get_object(id, fields="picture")
 
@@ -341,7 +341,7 @@ def person_profile_pic(id, access_token=None):
 
 def populate_user_with_fb_fields(user,  access_token):
 
-    graph = facebook.GraphAPI(access_token)
+    graph = GraphAPI(access_token)
     fb_object = graph.get_object(user.facebook_id, fields="first_name,last_name,birthday")
     print fb_object
 

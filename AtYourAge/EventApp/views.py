@@ -5,6 +5,7 @@ from django.core import serializers
 from django.db.models import F
 from django.views.decorators.csrf import csrf_exempt
 
+from random import sample
 
 from datetime import datetime
 
@@ -98,6 +99,42 @@ def related_events(request, event_id):
     return HttpResponse(content=json_string, content_type="application/json")
 
         
+def sample_events(request):
+
+    all_events = Event.objects.all()
+
+    sample_events = sample(all_events, 5)
+
+    response = serialize_event_json(sample_events)
+
+    return HttpResponse(response)
+
+
+def serialize_event_json(events):
+
+    event_array = []
+    for event in events:
+     
+        description = "%s%s" % (event.description[0].capitalize(), event.description[1:])
+        figure_dict = {
+                'id' : event.figure.id,
+                'name' : event.figure.name,
+                'image_url' : event.figure.image_url
+                }
+        event_dict = {
+                'figure' : figure_dict,
+                'age_years' : event.age_years,
+                'age_months' : event.age_months,
+                'age_days' : event.age_days,
+                'event_description' : description,
+                'event_id' : event.id 
+                }
+        event_array.append(event_dict)
+
+    retval = json.dumps(event_array)
+
+    return retval
+
 
 def story_with_birthday(request, fb_id ):
 
@@ -200,9 +237,18 @@ def figure_info(request, figure_id):
     }
 
     if figure.date_of_birth != None:
-        figure_dict['date_of_birth'] = figure.date_of_birth.strftime("%m/%d/%Y")
+        dob = figure.date_of_birth
+        if dob.year > 1900:
+            figure_dict['date_of_birth'] = dob.strftime("%m/%d/%Y")
+        else:
+            figure_dict['date_of_birth'] = "%i/%i/%i" % (dob.month, dob.day, dob.year)
     if figure.date_of_death != None:
-        figure_dict['date_of_death'] = figure.date_of_death.strftime("%m/%d/%Y")
+        dod = figure.date_of_death
+        if dod.year > 1900:
+            figure_dict['date_of_death'] = dod.strftime("%m/%d/%Y")
+        else:
+            figure_dict['date_of_death'] = "%i/%i/%i" % (dod.month, dod.day, dod.year)
+
 
     if figure.description != None:
         figure_dict['description'] = figure.description.encode('utf-8')

@@ -1,30 +1,11 @@
 from django.contrib import admin
 from EventApp.models import *
-from facebook import facebook
 
 
 class EventAdmin(admin.ModelAdmin):
 
-    def profile_pic(self, obj):
-        graph_obj = facebook.GraphAPI()
-        results = graph_obj.get_object("search", q=obj.name, type="page")
-
-        public_figures = [result['id'] for result in results['data'] if result['category'] == "Public figure"]   
-                  
-        try:
-            first_result_id = public_figures[0]
-            img_href = graph_obj.get_object(first_result_id, fields="picture")['picture']['data']['url']
-
-            return "<img src='%s'>" % img_href
-        except IndexError:
-            return "<img src=''>"
-
-    profile_pic.allow_tags = True
-    search_fields = ["figure__name"]
-
     list_display = ("figure", "description", "age_years", "age_months", "age_days", "male")
     list_filter = ("male",)
-    readonly_fields = ("profile_pic",)
 
 admin.site.register(Event, EventAdmin)
 
