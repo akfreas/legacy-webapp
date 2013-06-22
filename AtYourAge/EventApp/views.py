@@ -57,13 +57,14 @@ def related_events(request, event_id):
 
         access_token = user_dict['token']
         user_id = user_dict['activeUserId']
+        requesting_user = EventUser.objects.get(facebook_id=user_id)
+        requesting_user.num_requests = requesting_user.num_requests + 1;
+        requesting_user.save()
+
+
     except KeyError:
         access_token = ""
         user_id = ""
-
-    requesting_user = EventUser.objects.get(facebook_id=user_id)
-    requesting_user.num_requests = requesting_user.num_requests + 1;
-    requesting_user.save()
 
     try:
         the_event = Event.objects.get(id=event_id)
