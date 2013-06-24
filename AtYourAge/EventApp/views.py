@@ -195,7 +195,8 @@ def events(request):
         return HttpResponse(response)
 
 
-    requesting_user = EventUser.objects.get(facebook_id=user_id)
+    requesting_user = get_or_create_user(user_id)
+
     user_friends = EventUser.added_by.through.objects.filter(to_eventuser=requesting_user) 
 
     all_users = user_friends
