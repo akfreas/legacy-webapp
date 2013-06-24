@@ -1,6 +1,6 @@
 from datetime import datetime
 from math import floor
-from facebook.facebook import GraphAPI
+from facebook import GraphAPI
 import requests
 import string
 import json

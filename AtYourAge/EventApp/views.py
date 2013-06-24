@@ -17,6 +17,8 @@ import urllib
 
 import utils
 
+min_events = 5
+
 def event(request, years, months, days):
     event = Event.objects.filter(age_years=years, age_months=months, age_days=days)
     response = serializers.serialize("json", event) 
@@ -44,9 +46,53 @@ def update_birthday(request, user_id):
 
     return HttpResponse(content="User saved")
 
+@csrf_exempt
+def add_users(request):
+    post = request.body
+    person_array = json.loads(post)
+
+    formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
+    user_dict = json.loads(formatted_cookie)
+
+    access_token = user_dict['token']
+    user_id = user_dict['activeUserId']
+
+
+    requesting_user = get_or_create_user(user_id)
+
+    for fb_id in person_array:
+
+        
+        try:
+            fb_user = EventUser.objects.get(facebook_id=fb_id)
+            
+        except EventUser.DoesNotExist as e:
+            fb_user = EventUser(facebook_id=fb_id)
+            utils.populate_user_with_fb_fields(fb_user, access_token)
+            fb_user.save()
+
+        fb_user.added_by.add(requesting_user)
+
+    return HttpResponse(content="%s users saved/updated." % len(person_array))
+
+
+
 def create_simple_error(message):
 
     return "{'error' : '%s'}" % message
+
+def get_or_create_user(facebook_id):
+
+    try:
+        requesting_user = EventUser.objects.get(facebook_id=facebook_id)
+
+    except EventUser.DoesNotExist:
+        new_user = EventUser(facebook_id=facebook_id)
+        user.date_added = datetime.now()
+        utils.populate_user_with_fb_fields(new_user, access_token)
+        new_user.save()
+
+    return requesting_user
 
 def related_events(request, event_id):
 
@@ -60,6 +106,13 @@ def related_events(request, event_id):
         requesting_user = EventUser.objects.get(facebook_id=user_id)
         requesting_user.num_requests = requesting_user.num_requests + 1;
         requesting_user.save()
+
+    except EventUser.DoesNotExist:
+        new_user = EventUser(facebook_id=user_id)
+        new_user.num_requests = 0
+        user.date_added = datetime.now()
+        utils.populate_user_with_fb_fields(new_user, access_token)
+        new_user.save()
 
 
     except KeyError:
@@ -99,23 +152,118 @@ def related_events(request, event_id):
 
     return HttpResponse(content=json_string, content_type="application/json")
 
+def info_from_request_cookie(request):
+    try:
+        formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
+        user_dict = json.loads(formatted_cookie)
+
+        access_token = user_dict['token']
+        user_id = user_dict['activeUserId']
+
+    except KeyError:
+        access_token = None
+        user_id = None
+
+    return access_token, user_id
+
         
 def sample_events(request):
 
-    all_events = Event.objects.all()
+    all_events = Event.objects.all().exclude(figure__image_url="not_found")
 
     sample_events = sample(all_events, 5)
 
-    response = serialize_event_json(sample_events)
+    response_array = serialize_event_json_array(sample_events)
 
+    response = json.dumps(response_array)
     return HttpResponse(response)
 
 
-def serialize_event_json(events):
+def events(request):
+
+    access_token, user_id = info_from_request_cookie(request)
+
+    if access_token == None or user_id == None:
+
+        all_events = Event.objects.all().exclude(figure__image_url="not_found")
+
+        sample_events = sample(all_events, 5)
+
+        response_array = serialize_event_json_array(sample_events)
+
+        response = json.dumps(response_array)
+        return HttpResponse(response)
+
+
+    requesting_user = EventUser.objects.get(facebook_id=user_id)
+    user_friends = EventUser.added_by.through.objects.filter(to_eventuser=requesting_user) 
+
+    all_users = user_friends
+
+    event_array = []
+
+    def event_dict_for_user(user):
+        age = utils.get_age(user.birthday.year, user.birthday.month, user.birthday.day)
+        event = Event.objects.filter(age_years=age['years'], age_months=age['months'], age_days=age['days'])[0]
+        event_dict = serialize_event_json(event)
+        
+        user_dict = serialize_eventuser_json(user, access_token)
+
+        event_dict['person'] = user_dict
+        return event_dict
+
+
+    for user_addedby in all_users:
+        user = user_addedby.from_eventuser
+        event_dict = event_dict_for_user(user)
+        event_array.append(event_dict)
+
+    event_array.append(event_dict_for_user(requesting_user))
+
+    all_events = Event.objects.all().exclude(figure__image_url="not_found")
+    num_all_events = len(event_array)
+
+    if num_all_events < min_events:
+        sample_events = sample(all_events, min_events - num_all_events)
+        event_array += serialize_event_json_array(sample_events)
+
+
+
+
+    print event_array
+    json_dict = json.dumps(event_array)
+
+    return HttpResponse(content=json_dict)
+
+
+   
+
+def serialize_eventuser_json(person, access_token):
+
+    profile_pic = utils.person_profile_pic(person.facebook_id, access_token)
+
+    user_dict = {
+            'facebook_id' : person.facebook_id,
+            'first_name' : person.first_name,
+            'last_name' : person.last_name,
+            'birthday' : person.birthday.strftime("%m/%d/%Y"),
+
+            'profile_pic' : profile_pic
+            }
+    return user_dict
+
+def serialize_event_json_array(events):
 
     event_array = []
     for event in events:
-     
+        event_dict = serialize_event_json(event)
+        event_array.append(event_dict)
+
+
+    return event_array
+
+def serialize_event_json(event): 
+
         description = "%s%s" % (event.description[0].capitalize(), event.description[1:])
         figure_dict = {
                 'id' : event.figure.id,
@@ -130,16 +278,11 @@ def serialize_event_json(events):
                 'event_description' : description,
                 'event_id' : event.id 
                 }
-        event_array.append(event_dict)
-
-    retval = json.dumps(event_array)
-
-    return retval
-
+        
+        return event_dict
 
 def story_with_birthday(request, fb_id ):
 
-#    import pdb; pdb.set_trace()
     try:
 
         formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
