@@ -58,7 +58,7 @@ def add_users(request):
     user_id = user_dict['activeUserId']
 
 
-    requesting_user = get_or_create_user(user_id)
+    requesting_user = get_or_create_user(user_id, access_token)
 
     for fb_id in person_array:
 
@@ -81,7 +81,7 @@ def create_simple_error(message):
 
     return "{'error' : '%s'}" % message
 
-def get_or_create_user(facebook_id):
+def get_or_create_user(facebook_id, access_token):
 
     try:
         requesting_user = EventUser.objects.get(facebook_id=facebook_id)
@@ -195,7 +195,7 @@ def events(request):
         return HttpResponse(response)
 
 
-    requesting_user = get_or_create_user(user_id)
+    requesting_user = get_or_create_user(user_id, access_token)
 
     user_friends = EventUser.added_by.through.objects.filter(to_eventuser=requesting_user) 
 
