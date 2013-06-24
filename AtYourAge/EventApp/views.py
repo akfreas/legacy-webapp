@@ -84,15 +84,15 @@ def create_simple_error(message):
 def get_or_create_user(facebook_id, access_token):
 
     try:
-        requesting_user = EventUser.objects.get(facebook_id=facebook_id)
+        user = EventUser.objects.get(facebook_id=facebook_id)
 
     except EventUser.DoesNotExist:
-        new_user = EventUser(facebook_id=facebook_id)
-        new_user.date_added = datetime.now()
-        utils.populate_user_with_fb_fields(new_user, access_token)
-        new_user.save()
+        user = EventUser(facebook_id=facebook_id)
+        user.date_added = datetime.now()
+        utils.populate_user_with_fb_fields(user, access_token)
+        user.save()
 
-    return requesting_user
+    return user
 
 def related_events(request, event_id):
 
@@ -104,7 +104,10 @@ def related_events(request, event_id):
         access_token = user_dict['token']
         user_id = user_dict['activeUserId']
         requesting_user = EventUser.objects.get(facebook_id=user_id)
-        requesting_user.num_requests = requesting_user.num_requests + 1;
+        if requesting_user.num_requests == None:
+            requesting_user.num_requests = 1;
+        else:
+            requesting_user.num_requests = requesting_user.num_requests + 1;
         requesting_user.save()
 
     except EventUser.DoesNotExist:
