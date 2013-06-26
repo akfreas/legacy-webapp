@@ -208,19 +208,22 @@ def events(request):
 
     def event_dict_for_user(user):
         age = utils.get_age(user.birthday.year, user.birthday.month, user.birthday.day)
-        event = Event.objects.filter(age_years=age['years'], age_months=age['months'], age_days=age['days'])[0]
-        event_dict = serialize_event_json(event)
-        
-        user_dict = serialize_eventuser_json(user, access_token)
+        event = Event.objects.filter(age_years=age['years'], age_months=age['months'], age_days=age['days'])
+        if event.count() > 0:
+            event_dict = serialize_event_json(event[0])
+            
+            user_dict = serialize_eventuser_json(user, access_token)
 
-        event_dict['person'] = user_dict
-        return event_dict
+            event_dict['person'] = user_dict
+            return event_dict
 
 
     for user_addedby in all_users:
-        user = user_addedby.from_eventuser
-        event_dict = event_dict_for_user(user)
-        event_array.append(event_dict)
+            user = user_addedby.from_eventuser
+            if user.birthday != None:
+                event_dict = event_dict_for_user(user)
+                if event_dict != None:
+                    event_array.append(event_dict)
 
     event_array.append(event_dict_for_user(requesting_user))
 
