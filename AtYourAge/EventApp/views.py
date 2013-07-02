@@ -155,6 +155,20 @@ def related_events(request, event_id):
 
     return HttpResponse(content=json_string, content_type="application/json")
 
+def events_for_figure(request, figure_id):
+
+    events = Event.objects.filter(figure__id=figure_id)
+    if events.count() < 1:
+        return HttpResponse(content=create_simple_error("no events found for figure %s" % figure_id))
+
+ 
+    event_array = serialize_event_json_array(events)
+
+    event_json = json.dumps(event_array)
+
+    return HttpResponse(content=event_json, content_type="application/json")
+    
+
 def info_from_request_cookie(request):
     try:
         formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
@@ -195,7 +209,7 @@ def events(request):
         response_array = serialize_event_json_array(sample_events)
 
         response = json.dumps(response_array)
-        return HttpResponse(response)
+        return HttpResponse(response, content_type="application/json")
 
 
     requesting_user = get_or_create_user(user_id, access_token)
@@ -240,7 +254,7 @@ def events(request):
     print event_array
     json_dict = json.dumps(event_array)
 
-    return HttpResponse(content=json_dict)
+    return HttpResponse(content=json_dict, content_type="application/json")
 
 
    
