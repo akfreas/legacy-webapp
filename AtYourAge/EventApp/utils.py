@@ -1,6 +1,11 @@
 from datetime import datetime
 from math import floor
-from facebook import GraphAPI
+try:
+
+    from facebook import GraphAPI
+except ImportError:
+    from facebook.facebook import GraphAPI
+
 import requests
 import string
 import json
