@@ -4,6 +4,7 @@ from django.shortcuts import render_to_response
 from django.core import serializers
 from django.db.models import F
 from django.views.decorators.csrf import csrf_exempt
+from ios_notifications.models import Device as DV
 
 from random import sample
 
@@ -110,6 +111,8 @@ def get_or_create_device(device_token):
     except Device.DoesNotExist:
         device = Device(device_token=device_token)
 
+    apn_device = DV(token=device_token)
+    apn_device.save()
     return device
 
 def get_or_create_user(facebook_id, access_token):
