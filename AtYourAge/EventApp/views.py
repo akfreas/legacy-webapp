@@ -75,11 +75,42 @@ def add_users(request):
 
     return HttpResponse(content="%s users saved/updated." % len(person_array))
 
+@csrf_exempt
+def save_device_information(request):
+
+    access_token, user_id = info_from_request_cookie(request)
+
+    post_data = json.loads(request.body)
+
+    device = get_or_create_device(post_data['device_token'])
+    device.last_seen = datetime.now()
+
+    if access_token != None and user_id != None:
+
+        user = get_or_create_user(user_id, access_token)
+        if user not in device.associated_with.all():
+            device.associated_with.add(user)
+
+    device.save()
+
+    return HttpResponse("{'message' : 'ok'}")
+
+         
 
 
 def create_simple_error(message):
 
     return "{'error' : '%s'}" % message
+
+def get_or_create_device(device_token):
+    
+    try:
+        device = Device.objects.get(device_token=device_token)
+
+    except Device.DoesNotExist:
+        device = Device(device_token=device_token)
+
+    return device
 
 def get_or_create_user(facebook_id, access_token):
 

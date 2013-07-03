@@ -35,3 +35,10 @@ class EventUser(models.Model):
     date_first_seen = models.DateField(null=True, blank=True)
     date_last_seen = models.DateField(null=True, blank=True)
     num_requests = models.IntegerField(null=True, blank=True)
+
+class Device(models.Model):
+
+    associated_with = models.ManyToManyField("EventUser")
+    device_token = models.CharField(max_length=255)
+    date_added = models.DateField(null=True, blank=True)
+    date_last_seen = models.DateField(null=True, blank=True)

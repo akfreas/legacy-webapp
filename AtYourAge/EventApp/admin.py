@@ -27,3 +27,8 @@ class EventUserAdmin(admin.ModelAdmin):
 
 admin.site.register(EventUser, EventUserAdmin)
 
+class DeviceAdmin(admin.ModelAdmin):
+
+    list_display = ("device_token", "date_added", "date_last_seen",)
+
+admin.site.register(Device, DeviceAdmin)
