@@ -20,4 +20,6 @@ urlpatterns = patterns('EventApp.views',
      url(r'^users/add', 'add_users'),
      url(r'^user/(\d*)/update_birthday', 'update_birthday'),
      url(r'^device/information', 'save_device_information'),
+     url(r'^ios-notifications/', include('ios_notifications.urls')),
+
 )

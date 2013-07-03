@@ -124,6 +124,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'south',
     'gunicorn',
+    'ios_notifications',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
