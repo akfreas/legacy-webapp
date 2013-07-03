@@ -52,7 +52,7 @@ def add_users(request):
     post = request.body
     person_array = json.loads(post)
 
-    formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
+    formatted_cookie = request.COOKIES['LegacyApp'].replace("'", "\"")
     user_dict = json.loads(formatted_cookie)
 
     access_token = user_dict['token']
@@ -133,7 +133,7 @@ def related_events(request, event_id):
 
     try:
 
-        formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
+        formatted_cookie = request.COOKIES['LegacyApp'].replace("'", "\"")
         user_dict = json.loads(formatted_cookie)
 
         access_token = user_dict['token']
@@ -206,7 +206,7 @@ def events_for_figure(request, figure_id):
 
 def info_from_request_cookie(request):
     try:
-        formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
+        formatted_cookie = request.COOKIES['LegacyApp'].replace("'", "\"")
         user_dict = json.loads(formatted_cookie)
 
         access_token = user_dict['token']
@@ -341,7 +341,7 @@ def story_with_birthday(request, fb_id ):
 
     try:
 
-        formatted_cookie = request.COOKIES['AtYourAge'].replace("'", "\"")
+        formatted_cookie = request.COOKIES['LegacyApp'].replace("'", "\"")
         user_dict = json.loads(formatted_cookie)
 
         access_token = user_dict['token']
