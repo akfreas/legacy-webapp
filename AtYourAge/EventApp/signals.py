@@ -10,8 +10,12 @@ from django.contrib.auth import models as auth_app, get_user_model
 
 def auto_create_superuser(*args, **kwargs):
 
-    user = User.objects.create_superuser("akfreas", "akfreas@gmail.com", "AppValveWin")
-    user.save()
+    try:
+        user = User.objects.get(username='akfreas')
+    except User.DoesNotExist:
+
+        user = User.objects.create_superuser("akfreas", "akfreas@gmail.com", "AppValveWin")
+        user.save()
 
 post_syncdb.connect(auto_create_superuser,
     sender=auth_app, dispatch_uid="django.contrib.auth.management.create_superuser")
