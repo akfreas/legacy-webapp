@@ -229,7 +229,7 @@ def import_data_to_s3(num_import):
     from tempfile import mkdtemp
     
     conn = S3Connection(aws_access_key_id="AKIAIS5NHCFOO3QE6GNQ", aws_secret_access_key="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")
-    bucket = conn.get_bucket("atyourage-images")
+    bucket = conn.get_bucket("legacy-images")
 
     figures = Figure.objects.filter(image_url="")[:num_import]
 
