@@ -6,7 +6,7 @@ from time import sleep
 
 code_dir = '/var/www/yardstick/current'
 env.key_filename = "/Users/akfreas/Dropbox/sashimiblade/AppValve-deploy-data/private_keys/Alex-47.pem"
-env.host_string = "ubuntu@atyourage.sashimiblade.com"
+env.host_string = "ubuntu@legacyapp.sashimiblade.com"
 
 
 def deploy():
@@ -41,7 +41,7 @@ def update_dep():
 def update_db():
 
     with cd(code_dir):
-        run("source bin/activate && AtYourAge/manage.py migrate EventApp")
+        run("source bin/activate && Legacy/manage.py migrate EventApp")
 
 
 def hello():
