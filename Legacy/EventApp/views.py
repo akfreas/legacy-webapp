@@ -74,7 +74,7 @@ def add_users(request):
 
         fb_user.added_by.add(requesting_user)
 
-    return HttpResponse(content="%s users saved/updated." % len(person_array))
+    return HttpResponse(content="{'message' : '%s users saved/updated.'" % len(person_array), content_type="application/json")
 
 @csrf_exempt
 def save_device_information(request):
