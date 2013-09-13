@@ -419,6 +419,24 @@ def story_with_birthday(request, fb_id ):
 
 def figure_info(request, figure_id):
 
+    print request
+    if request.META['HTTP_ACCEPT'] == "application/json":
+        return figure_info_json(request, figure_id)
+    else:
+        return figure_info_html(request, figure_id)
+
+def figure_info_html(request, figure_id):
+    figure = Figure.objects.get(id=figure_id)
+    events = Event.objects.filter(figure=figure)
+
+    age_formatted = lambda(event): "%s years, %s months, %s days old" % (event.age_years, event.age_months, event.age_days) 
+
+    event_array = [{'desc' : event.description, 'age' : age_formatted(event)} for event in events]
+
+    return render_to_response("figure.html", {'figure' : figure, 'events' : event_array}, context_instance=RequestContext(request))
+
+def figure_info_json(request, figure_id):
+        
     try:
         figure = Figure.objects.get(id=figure_id)
     except Figure.DoesNotExist:
