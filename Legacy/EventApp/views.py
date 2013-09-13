@@ -18,7 +18,7 @@ import urllib
 
 import utils
 
-min_events = 5
+min_events = 25
 
 def event(request, years, months, days):
     event = Event.objects.filter(age_years=years, age_months=months, age_days=days)
@@ -74,7 +74,9 @@ def add_users(request):
 
         fb_user.added_by.add(requesting_user)
 
-    return HttpResponse(content="{'message' : '%s users saved/updated.'" % len(person_array), content_type="application/json")
+    json_string = json.dumps({'users_saved' : '%s' % len(person_array)})
+
+    return HttpResponse(content=json_string, content_type="application/json")
 
 @csrf_exempt
 def save_device_information(request):
@@ -239,7 +241,7 @@ def events(request):
 
         all_events = Event.objects.all().exclude(figure__image_url="not_found")
 
-        sample_events = sample(all_events, 5)
+        sample_events = sample(all_events, min_events)
 
         response_array = serialize_event_json_array(sample_events)
 
@@ -276,7 +278,7 @@ def events(request):
 
     event_array.append(event_dict_for_user(requesting_user))
 
-    all_events = Event.objects.all().exclude(figure__image_url="not_found")
+    all_events = Event.objects.all()
     num_all_events = len(event_array)
 
     if num_all_events < min_events:
@@ -286,7 +288,6 @@ def events(request):
 
 
 
-    print event_array
     json_dict = json.dumps(event_array)
 
     return HttpResponse(content=json_dict, content_type="application/json")

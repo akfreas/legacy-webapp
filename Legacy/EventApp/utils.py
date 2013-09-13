@@ -29,11 +29,9 @@ def figure_wikipedia_pic(figure_name, image_height):
 
 
     wiki_images_url =  "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=images&redirects" % figure_name
-    print wiki_images_url
     wiki_images_get = requests.get(wiki_images_url)
     wiki_json = wiki_images_get.json()
     wiki_page_url  = "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=revisions&rvprop=content&rvsection=0&redirects" % figure_name
-    print wiki_page_url
     wiki_page_json = requests.get(wiki_page_url).json()
     try:
         redirect_array = wiki_page_json['query']['redirects']
@@ -190,15 +188,12 @@ def populate_figure_datapoints(figure):
 def figure_fb_profile_pic(figure_name, image_height):
     graph_obj = GraphAPI()
     results = graph_obj.get_object("search", q=figure_name, type="page")
-    print results
 
     public_figures = [result['id'] for result in results['data'] if result['category'] == "Public figure"]   
-    print public_figures
               
     try:
         first_result_id = public_figures[0]
         img_href = "https://graph.facebook.com/%s/picture?height=%s" % (first_result_id, image_height)
-        print "Href: %s" % img_href
     except:
         return None
 
@@ -209,14 +204,12 @@ def figure_pic_href(name, size):
     fetch_functions = [figure_freebase_pic, figure_wikipedia_pic]
     image_url = None
 
-    print "Finding picture for %s" % name
 
     while len(fetch_functions) > 0 and (image_url == None or len(image_url) < 0):
 
         function = fetch_functions.pop()
         image_url = function(name, size)
         
-    print "Found %s" % image_url
     return image_url
 
 
