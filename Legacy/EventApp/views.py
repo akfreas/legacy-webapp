@@ -35,8 +35,8 @@ def update_birthday(request, user_id):
     body_dict = json.loads(post)
     bday = datetime.strptime(body_dict['birthday'], "%Y/%m/%d")
 
-    access_token, user_id = info_from_request_cookie(request)
-    requesting_user = get_or_create_user(user_id, access_token)
+    access_token, requesting_user_id = info_from_request_cookie(request)
+    requesting_user = get_or_create_user(requesting_user_id, access_token)
 
 
     try:
