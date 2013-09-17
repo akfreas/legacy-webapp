@@ -4,8 +4,8 @@ from fabric.api import *
 from fabric.contrib.console import confirm
 from time import sleep
 
-code_dir = '/var/www/yardstick/current'
-env.key_filename = "/Users/akfreas/Dropbox/sashimiblade/AppValve-deploy-data/private_keys/Alex-47.pem"
+code_dir = '/var/www/legacyapp/current'
+env.key_filename = "/Users/akfreas/Dropbox/sashimiblade/AppValve-deploy-data/private_keys/Alex-3.pem"
 env.host_string = "ubuntu@legacyapp.sashimiblade.com"
 
 

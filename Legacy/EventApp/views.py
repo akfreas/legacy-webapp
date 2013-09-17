@@ -27,7 +27,6 @@ def event(request, years, months, days):
 
 @csrf_exempt
 def test(request):
-    print request
     return render_to_response("base.html")
 
 @csrf_exempt
@@ -35,6 +34,10 @@ def update_birthday(request, user_id):
     post = request.body
     body_dict = json.loads(post)
     bday = datetime.strptime(body_dict['birthday'], "%Y/%m/%d")
+
+    access_token, user_id = info_from_request_cookie(request)
+    requesting_user = get_or_create_user(user_id, access_token)
+
 
     try:
         user = EventUser.objects.get(facebook_id=user_id)
@@ -44,26 +47,24 @@ def update_birthday(request, user_id):
 
     user.birthday = bday
     user.save()
+    user.added_by.add(requesting_user)
+    user.save()
+    json_string = json.dumps({'user' : user.facebook_id, 'birthday_saved' : True})
 
-    return HttpResponse(content="User saved")
+    return HttpResponse(content=json_string, content_type="application/json")
 
 @csrf_exempt
 def add_users(request):
     post = request.body
     person_array = json.loads(post)
 
-    formatted_cookie = request.COOKIES['LegacyApp'].replace("'", "\"")
-    user_dict = json.loads(formatted_cookie)
-
-    access_token = user_dict['token']
-    user_id = user_dict['activeUserId']
-
-
+    access_token, user_id = info_from_request_cookie(request)
     requesting_user = get_or_create_user(user_id, access_token)
 
-    for fb_id in person_array:
+    print person_array
 
-        
+    for fb_id in person_array:
+   
         try:
             fb_user = EventUser.objects.get(facebook_id=fb_id)
             
@@ -131,67 +132,6 @@ def get_or_create_user(facebook_id, access_token):
 
     return user
 
-def related_events(request, event_id):
-
-    try:
-
-        formatted_cookie = request.COOKIES['LegacyApp'].replace("'", "\"")
-        user_dict = json.loads(formatted_cookie)
-
-        access_token = user_dict['token']
-        user_id = user_dict['activeUserId']
-        requesting_user = EventUser.objects.get(facebook_id=user_id)
-        if requesting_user.num_requests == None:
-            requesting_user.num_requests = 1;
-        else:
-            requesting_user.num_requests = requesting_user.num_requests + 1;
-        requesting_user.save()
-
-    except EventUser.DoesNotExist:
-        new_user = EventUser(facebook_id=user_id)
-        new_user.num_requests = 0
-        user.date_added = datetime.now()
-        utils.populate_user_with_fb_fields(new_user, access_token)
-        new_user.save()
-
-
-    except KeyError:
-        access_token = ""
-        user_id = ""
-
-    try:
-        the_event = Event.objects.get(id=event_id)
-        events = Event.objects.filter(figure=the_event.figure)
-    except Event.DoesNotExist:
-        return HttpResponse(content=create_simple_error("Could not find related event for event with id %s" % event_id))
-
-  
-    event_arr = []
-
-    for event in events:
-
-        description = "%s%s" % (event.description[0].upper(), event.description[1:])
-
-        e_dict = {'description' : description,
-                 'age_days' : event.age_days,
-                 'age_months' : event.age_months,
-                 'age_years' : event.age_years,
-                 'is_self' : False,
-                 }
-        if event.id == int(event_id):
-            e_dict['is_self'] = True
-
-        event_arr.append(e_dict)
-
-    ret_val = {'parent_id' : event_id,
-               'events' : event_arr
-               }
- 
-
-    json_string = json.dumps(ret_val)
-
-    return HttpResponse(content=json_string, content_type="application/json")
-
 def events_for_figure(request, figure_id):
 
     events = Event.objects.filter(figure__id=figure_id)
@@ -221,16 +161,17 @@ def info_from_request_cookie(request):
     return access_token, user_id
 
         
-def sample_events(request):
+
+def events_for_no_user(request):
 
     all_events = Event.objects.all().exclude(figure__image_url="not_found")
 
-    sample_events = sample(all_events, 5)
+    sample_events = sample(all_events, min_events)
 
     response_array = serialize_event_json_array(sample_events)
 
     response = json.dumps(response_array)
-    return HttpResponse(response)
+    return HttpResponse(response, content_type="application/json")
 
 
 def events(request):
@@ -238,19 +179,9 @@ def events(request):
     access_token, user_id = info_from_request_cookie(request)
 
     if access_token == None or user_id == None:
-
-        all_events = Event.objects.all().exclude(figure__image_url="not_found")
-
-        sample_events = sample(all_events, min_events)
-
-        response_array = serialize_event_json_array(sample_events)
-
-        response = json.dumps(response_array)
-        return HttpResponse(response, content_type="application/json")
-
+        return events_for_no_user(request)
 
     requesting_user = get_or_create_user(user_id, access_token)
-
     user_friends = EventUser.added_by.through.objects.filter(to_eventuser=requesting_user) 
 
     all_users = user_friends
@@ -337,143 +268,4 @@ def serialize_event_json(event):
                 }
         
         return event_dict
-
-def story_with_birthday(request, fb_id ):
-
-    try:
-
-        formatted_cookie = request.COOKIES['LegacyApp'].replace("'", "\"")
-        user_dict = json.loads(formatted_cookie)
-
-        access_token = user_dict['token']
-        user_id = user_dict['activeUserId']
-    except KeyError:
-        access_token = ""
-        user_id = ""
-
-
-    try:
-        user = EventUser.objects.get(facebook_id=fb_id)
-
-        if user.first_name == None or user.last_name == None or user.birthday == None:
-            utils.populate_user_with_fb_fields(user, access_token)
-            user.save()
-
-    except EventUser.DoesNotExist:
-        user = EventUser(facebook_id=fb_id)
-        user.date_added = datetime.now()
-        utils.populate_user_with_fb_fields(user, access_token)
-        user.save()
-
-    try:
-        requesting_user = EventUser.objects.get(facebook_id=user_id)
-        requesting_user.date_last_seen = datetime.now()
-
-        if user.id != requesting_user.id:
-            user.added_by.add(requesting_user)
-            user.save()
-
-        if requesting_user.num_requests != None:
-            requesting_user.num_requests = requesting_user.num_requests + 1
-        else:
-            requesting_user.num_requests = 1
-
-        requesting_user.save()
-    except EventUser.DoesNotExist:
-        pass
-    bday = user.birthday
- 
-    elapsed_time = utils.get_age(bday.year, bday.month, bday.day)
-
-    years = elapsed_time["years"]
-    months = elapsed_time["months"]
-    days = elapsed_time["days"]
-   
-
-    person_profile_pic = utils.person_profile_pic(fb_id, access_token)
-    events = Event.objects.filter(age_years=years, age_months=months, age_days=days)
-    event_list = []
-    event = events[0]
-    event = events[0]
-    sex = "he"
- 
-    if event.male == False:
-        sex = "she"
-   
-    description = "%s%s" % (event.description[0].capitalize(), event.description[1:])
-
-    info_dict = {'person_profile_pic' : person_profile_pic,
-            'figure_profile_pic' : event.figure.image_url,
-            'figure_id' : event.figure.id,
-            'figure_name' : event.figure.name,
-            'age_years' : years,
-            'age_months' : months,
-            'age_days' : days,
-            'figure_pronoun' : sex,
-            'figure_event' : description,
-            'event_id' : event.id }
-
-    response = json.dumps(info_dict)
-
-    return HttpResponse(response)
-
-def figure_info(request, figure_id):
-
-    print request
-    if request.META['HTTP_ACCEPT'] == "application/json":
-        return figure_info_json(request, figure_id)
-    else:
-        return figure_info_html(request, figure_id)
-
-def figure_info_html(request, figure_id):
-    figure = Figure.objects.get(id=figure_id)
-    events = Event.objects.filter(figure=figure)
-
-    age_formatted = lambda(event): "%s years, %s months, %s days old" % (event.age_years, event.age_months, event.age_days) 
-
-    event_array = [{'desc' : event.description, 'age' : age_formatted(event)} for event in events]
-
-    return render_to_response("figure.html", {'figure' : figure, 'events' : event_array}, context_instance=RequestContext(request))
-
-def figure_info_json(request, figure_id):
-        
-    try:
-        figure = Figure.objects.get(id=figure_id)
-    except Figure.DoesNotExist:
-        return HttpResponse(content=create_simple_error("Figure with id %s does not exist." % figure_id))
-
-
-#    [figure_dict.__setitem__(key, figure.__getattribute__(key).encode('utf-8')) for key in figure._meta.get_all_field_names() if key != "event"]
-
-    keys = ['name', 'image_url', 'description', 'date_of_birth', 'date_of_death']
-
-
-    figure_dict = {'name' : figure.name,
-            'image_url' : figure.image_url,
-            'description' : "",
-            'date_of_birth' : "",
-            'date_of_death' : "",
-    }
-
-    if figure.date_of_birth != None:
-        dob = figure.date_of_birth
-        if dob.year > 1900:
-            figure_dict['date_of_birth'] = dob.strftime("%m/%d/%Y")
-        else:
-            figure_dict['date_of_birth'] = "%i/%i/%i" % (dob.month, dob.day, dob.year)
-    if figure.date_of_death != None:
-        dod = figure.date_of_death
-        if dod.year > 1900:
-            figure_dict['date_of_death'] = dod.strftime("%m/%d/%Y")
-        else:
-            figure_dict['date_of_death'] = "%i/%i/%i" % (dod.month, dod.day, dod.year)
-
-
-    if figure.description != None:
-        figure_dict['description'] = figure.description.encode('utf-8')
-
-
-    json_string = json.dumps(figure_dict)
-
-    return HttpResponse(content=json_string)
 
