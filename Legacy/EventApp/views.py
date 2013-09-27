@@ -61,7 +61,6 @@ def add_users(request):
     access_token, user_id = info_from_request_cookie(request)
     requesting_user = get_or_create_user(user_id, access_token)
 
-    print person_array
 
     for fb_id in person_array:
    
@@ -78,6 +77,24 @@ def add_users(request):
     json_string = json.dumps({'users_saved' : '%s' % len(person_array)})
 
     return HttpResponse(content=json_string, content_type="application/json")
+
+def delete_user(request, user):
+
+    print request
+    access_token, user_id = info_from_request_cookie(request)
+    print access_token, user_id
+    requesting_user = get_or_create_user(user_id, access_token)
+
+
+    user_to_delete = EventUser.objects.get(facebook_id=user)
+    user_to_delete.added_by.remove(requesting_user)
+    user_to_delete.save()
+
+    json_string = json.dumps({'deleted' : user_to_delete.facebook_id})
+
+    return HttpResponse(content=json_string, content_type="application/json")
+
+
 
 @csrf_exempt
 def save_device_information(request):
