@@ -22,8 +22,50 @@ admin.site.register(Figure, FigureAdmin)
 
 class EventUserAdmin(admin.ModelAdmin):
 
+    def remove_added_by(modeladmin, request, queryset):
+
+        if request.GET['q'] is not None:
+
+            first_name, last_name = request.GET['q'].split(" ")
+            our_user = EventUser.objects.get(first_name__iexact=first_name, last_name__iexact=last_name)
+
+            filtered_objects = EventUser.objects.filter(added_by=our_user)
+
+            for obj in filtered_objects:
+                obj.added_by.remove(our_user)
+                obj.save()
+
+
+
     list_display = ("facebook_id", "first_name", "last_name", "date_first_seen", "date_last_seen", "date_added", "num_requests")
-    pass
+    search_fields = ('added_by__first_name', 'added_by__last_name')
+    actions = ['remove_added_by']
+
+    def get_search_results(self, request, queryset, search_term):
+
+        first_name, last_name = search_term.split(" ")
+
+        our_user = EventUser.objects.get(first_name=first_name, last_name=last_name)
+
+        queryset = EventUser.objects.filter(added_by=our_user)
+        
+        return queryset, False
+
+    def get_actions(self, request):
+
+        actions = super(EventUserAdmin, self).get_actions(request)
+        names = None
+        if 'q' in request.GET.keys():
+            names = request.GET['q'].split(" ")
+
+        if (names == None):
+            del actions['remove_added_by']
+        else:
+            first_name, last_name = names
+            our_user = EventUser.objects.get(first_name__iexact=first_name, last_name__iexact=last_name)
+            actions['remove_added_by'] = actions['remove_added_by'][0:2] + ("Remove users added by %s %s" % (first_name, last_name),)
+
+        return actions
 
 admin.site.register(EventUser, EventUserAdmin)
 
