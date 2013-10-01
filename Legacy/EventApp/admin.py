@@ -71,6 +71,11 @@ admin.site.register(EventUser, EventUserAdmin)
 
 class DeviceAdmin(admin.ModelAdmin):
 
-    list_display = ("device_token", "date_added", "date_last_seen",)
+
+    def associated_with_formatted(self, obj):
+        return ", ".join(["%s %s" % (x.first_name, x.last_name) for x in obj.associated_with.all()])
+
+    associated_with_formatted.short_description = "Associated with user"
+    list_display = ("device_token", "date_added", "date_last_seen", "associated_with_formatted")
 
 admin.site.register(Device, DeviceAdmin)
