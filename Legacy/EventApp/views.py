@@ -38,12 +38,7 @@ def update_birthday(request, user_id):
     access_token, requesting_user_id = info_from_request_cookie(request)
     requesting_user = get_or_create_user(requesting_user_id, access_token)
 
-
-    try:
-        user = EventUser.objects.get(facebook_id=user_id)
-    except EventUser.DoesNotExist as e:
-        user = EventUser(facebook_id=user_id)
-
+    user = get_or_create_user(facebook_id, access_token)
 
     user.birthday = bday
     user.save()
@@ -64,14 +59,7 @@ def add_users(request):
 
     for fb_id in person_array:
    
-        try:
-            fb_user = EventUser.objects.get(facebook_id=fb_id)
-            
-        except EventUser.DoesNotExist as e:
-            fb_user = EventUser(facebook_id=fb_id)
-            utils.populate_user_with_fb_fields(fb_user, access_token)
-            fb_user.save()
-
+        fb_user = get_or_create_user(fb_id, access_token)
         fb_user.added_by.add(requesting_user)
 
     json_string = json.dumps({'users_saved' : '%s' % len(person_array)})
@@ -140,13 +128,14 @@ def get_or_create_user(facebook_id, access_token):
 
     try:
         user = EventUser.objects.get(facebook_id=facebook_id)
+        user.date_last_seen = datetime.now()
 
     except EventUser.DoesNotExist:
         user = EventUser(facebook_id=facebook_id)
         user.date_added = datetime.now()
         utils.populate_user_with_fb_fields(user, access_token)
-        user.save()
 
+    user.save()
     return user
 
 def events_for_figure(request, figure_id):
