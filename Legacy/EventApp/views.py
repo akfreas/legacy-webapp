@@ -40,7 +40,7 @@ def update_birthday(request, user_id):
     requesting_user.date_last_seen = datetime.now()
     requesting_user.save()
 
-    user = get_or_create_user(facebook_id, access_token)
+    user = get_or_create_user(requesting_user_id, access_token)
 
     user.birthday = bday
     user.save()
@@ -201,13 +201,20 @@ def events(request):
     def event_dict_for_user(user):
         age = utils.get_age(user.birthday.year, user.birthday.month, user.birthday.day)
         event = Event.objects.filter(age_years=age['years'], age_months=age['months'], age_days=age['days'])
+        user_dict = serialize_eventuser_json(user, access_token)
+
+        event_dict = {}
+
         if event.count() > 0:
             event_dict = serialize_event_json(event[0])
             
-            user_dict = serialize_eventuser_json(user, access_token)
+        else:
+            event_dict['error'] = "There are no entries for %s at their age." % user.first_name
 
-            event_dict['person'] = user_dict
-            return event_dict
+        event_dict['person'] = user_dict
+
+        return event_dict
+
 
 
     for user_addedby in all_users:
