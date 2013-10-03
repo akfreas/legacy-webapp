@@ -59,11 +59,18 @@ def add_users(request):
     requesting_user = get_or_create_user(user_id, access_token)
     requesting_user.date_last_seen = datetime.now()
 
+    for person_info in person_array:
 
-    for fb_id in person_array:
+        fb_id = person_info['facebook_id']
    
+        birthday = datetime.strptime(person_info['birthday'], "%Y/%m/%d")
+
+
         fb_user = get_or_create_user(fb_id, access_token)
+        fb_user.birthday = birthday
+        fb_user.save()
         fb_user.added_by.add(requesting_user)
+
 
     json_string = json.dumps({'users_saved' : '%s' % len(person_array)})
 
@@ -209,7 +216,7 @@ def events(request):
             event_dict = serialize_event_json(event[0])
             
         else:
-            event_dict['error'] = "There are no entries for %s at their age." % user.first_name
+            event_dict['error'] = {'NoEventError' : "There are no entries for %s at their age." % user.first_name}
 
         event_dict['person'] = user_dict
 
