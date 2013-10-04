@@ -1,11 +1,5 @@
 from datetime import datetime
 from math import floor
-try:
-
-    from facebook import GraphAPI
-except ImportError:
-    from facebook.facebook import GraphAPI
-
 import requests
 import string
 import json
@@ -136,7 +130,7 @@ def figure_freebase_pic(figure_name, image_height):
     img_request = requests.get(url).json()
     if "error" not in img_request.keys():
         img_id = img_request['id']
-        url = "https://usercontent.googleapis.com/freebase/v1/image%s?maxwidth=%s" % (img_id, image_height)
+        url = "https://usercontent.googleapis.com/freebase/v1/image%s?maxwidth=%s&key=%s" % (img_id, image_height, api_key)
         return url
     else:
         return None
@@ -222,25 +216,18 @@ def import_data_to_s3(num_import):
     from tempfile import mkdtemp
     
     conn = S3Connection(aws_access_key_id="AKIAIS5NHCFOO3QE6GNQ", aws_secret_access_key="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")
-    bucket = conn.get_bucket("legacy-images")
+    bucket = conn.get_bucket("legacyapp-images")
 
-    figures = Figure.objects.filter(image_url="")[:num_import]
-
+    figures = Figure.objects.filter(image_url="not_found")[:num_import]
     
     temp_dir = mkdtemp()
     
 
     counter = 0;
-    #import pdb; pdb.set_trace()
-
-    from facebook.facebook import GraphAPIError
 
     for figure in figures:
 
-        try:
-            pic_url = figure_pic_href(figure.name, 200)
-        except GraphAPIError:
-            pic_url = None
+        pic_url = figure_pic_href(figure.name, 200)
             
         print figure
 
@@ -250,6 +237,7 @@ def import_data_to_s3(num_import):
 
             pic_hash = md5(pic_url).hexdigest()
             pic_request = requests.get(pic_url, verify=False)
+            pic_file_extension = pic_url.split(".")[-1]
             content_type = pic_request.headers['content-type']
 
             if "image" in content_type:
@@ -271,10 +259,10 @@ def import_data_to_s3(num_import):
                     try:
 
                         new_image = image.resize(new_size)
-                        new_image.save(pic_filename)
+                        new_image.save("%s.%s" % (pic_filename, content_map[content_type]))
                     except IOError:
 
-                        figure.image_url = "not_found"
+                        figure.image_url = "not_found_0"
                         figure.save()
                         break
 
@@ -294,11 +282,11 @@ def import_data_to_s3(num_import):
                 counter += 1
 
             else:
-                figure.image_url = "not_found"
+                figure.image_url = "not_found_1"
                 figure.save()
 
         else:
-            figure.image_url = "not_found"
+            figure.image_url = "not_found_2"
             figure.save()
 
 
@@ -308,19 +296,14 @@ def import_data_to_s3(num_import):
          
 def import_until_done():
     
-    from facebook.facebook import GraphAPIError
-
-    figures_nopic = Figure.objects.filter(image_url="")
+    figures_nopic = Figure.objects.filter(image_url="not_found")
 
 
     while figures_nopic.count() > 100:
 
         #import pdb; pdb.set_trace()
-        try:
-            import_data_to_s3(100)
-        except GraphAPIError:
-            pass
-        figures_nopic = Figure.objects.filter(image_url="")
+        import_data_to_s3(100)
+        figures_nopic = Figure.objects.filter(image_url="not_found")
 
 
 
