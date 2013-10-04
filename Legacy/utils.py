@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+
+import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "EventApp.settings")
+
 from datetime import datetime
 from math import floor
 import requests
@@ -338,3 +343,6 @@ def populate_user_with_fb_fields(user,  access_token):
     except KeyError as e:
         print "User birthday not found: %s" % fb_object
         print e.message
+
+if __name__ == '__main__':
+    import_until_done()
