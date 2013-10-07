@@ -58,6 +58,7 @@ def add_users(request):
     access_token, user_id = info_from_request_cookie(request)
     requesting_user = get_or_create_user(user_id, access_token)
     requesting_user.date_last_seen = datetime.now()
+    requesting_user.save()
 
     for person_info in person_array:
 
@@ -83,6 +84,7 @@ def delete_user(request, user):
     print access_token, user_id
     requesting_user = get_or_create_user(user_id, access_token)
     requesting_user.date_last_seen = datetime.now()
+    requesting_user.save()
 
 
     user_to_delete = EventUser.objects.get(facebook_id=user)
@@ -199,6 +201,7 @@ def events(request):
 
     requesting_user = get_or_create_user(user_id, access_token)
     requesting_user.date_last_seen = datetime.now()
+    requesting_user.save()
     user_friends = EventUser.added_by.through.objects.filter(to_eventuser=requesting_user) 
 
     all_users = user_friends

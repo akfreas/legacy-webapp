@@ -1,7 +1,9 @@
 #!/usr/bin/env python
+try:
+    from facebook import GraphAPI
+except ImportError:
+    from facebook.facebook import GraphAPI
 
-import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "EventApp.settings")
 
 from datetime import datetime
 from math import floor
@@ -345,4 +347,8 @@ def populate_user_with_fb_fields(user,  access_token):
         print e.message
 
 if __name__ == '__main__':
+
+    import os
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "EventApp.settings")
+
     import_until_done()
