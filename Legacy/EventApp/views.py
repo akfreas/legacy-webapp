@@ -77,6 +77,24 @@ def add_users(request):
 
     return HttpResponse(content=json_string, content_type="application/json")
 
+def validate_passcode(request, passcode):
+    
+    print passcode
+    dic = {}
+    try:
+        approved = ApprovedBetaTesters.objects.get(code=passcode)
+
+        dic['verification_status'] = "success"
+        dic['message'] = "nice job bro"
+
+    except ApprovedBetaTesters.DoesNotExist:
+
+        dic['verification_status'] = "failure"
+        dic['message'] = "Your passcode is invalid.  Sorry!"
+
+    return HttpResponse(content=json.dumps(dic), content_type="application/json")
+
+
 def delete_user(request, user):
 
     print request

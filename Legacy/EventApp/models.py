@@ -13,6 +13,17 @@ class Figure(models.Model):
     date_of_birth = models.DateField(blank=True, null=True)
     date_of_death = models.DateField(blank=True, null=True)
 
+class ApprovedBetaTesters(models.Model):
+
+    def __unicode__(self):
+        return "%s - %s" % (self.code, self.name)
+
+    code = models.CharField(max_length=20)
+    name = models.CharField(max_length=100)
+    used = models.BooleanField()
+    time_used = models.DateTimeField(blank=True, null=True)
+    
+
 class Event(models.Model):
     figure = models.ForeignKey("Figure", null=True)
     description = models.CharField(max_length=254)

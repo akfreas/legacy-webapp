@@ -20,6 +20,14 @@ class FigureAdmin(admin.ModelAdmin):
 
 admin.site.register(Figure, FigureAdmin)
 
+class ApprovedBetaTesterAdmin(admin.ModelAdmin):
+
+    list_display = ('code', 'name', 'used', 'time_used')
+    verbose_name = "Approved Beta Tester"
+
+admin.site.register(ApprovedBetaTesters, ApprovedBetaTesterAdmin)
+
+
 class EventUserAdmin(admin.ModelAdmin):
 
     def remove_added_by(modeladmin, request, queryset):
