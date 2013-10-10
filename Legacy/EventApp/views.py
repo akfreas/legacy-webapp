@@ -85,7 +85,7 @@ def validate_passcode(request, passcode):
         approved = ApprovedBetaTesters.objects.get(code=passcode)
 
         dic['verification_status'] = "success"
-        dic['message'] = "nice job bro"
+        dic['message'] = approved.message
 
     except ApprovedBetaTesters.DoesNotExist:
 

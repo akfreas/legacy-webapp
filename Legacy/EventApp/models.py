@@ -20,6 +20,7 @@ class ApprovedBetaTesters(models.Model):
 
     code = models.CharField(max_length=20)
     name = models.CharField(max_length=100)
+    message = models.CharField(max_length=200, blank=True, null=True)
     used = models.BooleanField()
     time_used = models.DateTimeField(blank=True, null=True)
     
