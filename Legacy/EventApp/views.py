@@ -86,6 +86,9 @@ def validate_passcode(request, passcode):
 
         dic['verification_status'] = "success"
         dic['message'] = approved.message
+        approved.used = True
+        approved.time_used = datetime.now()
+        approved.save()
 
     except ApprovedBetaTesters.DoesNotExist:
 
