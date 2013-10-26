@@ -1,6 +1,8 @@
 from django.contrib import admin
 from EventApp.models import *
 
+from django.forms import TextInput, Textarea
+from django.db import models
 
 class EventAdmin(admin.ModelAdmin):
 
@@ -9,11 +11,21 @@ class EventAdmin(admin.ModelAdmin):
 
 admin.site.register(Event, EventAdmin)
 
+class EventInline(admin.TabularInline):
+
+    model = Event
+    formfield_overrides = {
+                    models.CharField: {'widget': TextInput(attrs={'size':'100'})},
+                        }
+
+
+
 class FigureAdmin(admin.ModelAdmin):
 
     def profile_pic(self, obj):
         return "<img src='%s' height='100'>" % obj.image_url
 
+    inlines = [EventInline]
     search_fields = ["name"]
     profile_pic.allow_tags = True
     list_display = ("name", "image_url", "profile_pic", "date_of_birth", "date_of_death")
