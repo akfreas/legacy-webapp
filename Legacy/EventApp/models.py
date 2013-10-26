@@ -8,6 +8,7 @@ class Figure(models.Model):
         return self.name
 
     name = models.CharField(max_length=100)
+    male = models.BooleanField()
     image_url = models.URLField(blank=True)
     description = models.TextField(blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
