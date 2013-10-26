@@ -6,8 +6,7 @@ from django.db import models
 
 class EventAdmin(admin.ModelAdmin):
 
-    list_display = ("figure", "description", "age_years", "age_months", "age_days", "male")
-    list_filter = ("male",)
+    list_display = ("figure", "description", "age_years", "age_months", "age_days")
 
 admin.site.register(Event, EventAdmin)
 
