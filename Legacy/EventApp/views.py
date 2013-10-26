@@ -27,7 +27,7 @@ def event(request, years, months, days):
 
 @csrf_exempt
 def test(request):
-    return render_to_response("base.html")
+    return HttpResponse(content="Healthy.")
 
 @csrf_exempt
 def update_birthday(request, user_id):
