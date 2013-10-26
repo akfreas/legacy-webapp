@@ -29,7 +29,6 @@ class ApprovedBetaTesters(models.Model):
 class Event(models.Model):
     figure = models.ForeignKey("Figure", null=True)
     description = models.CharField(max_length=254)
-    male = models.BooleanField()
     age_years = models.IntegerField()
     age_months = models.IntegerField()
     age_days = models.IntegerField()
