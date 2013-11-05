@@ -5,6 +5,7 @@ except ImportError:
     from facebook.facebook import GraphAPI
 
 
+
 from datetime import datetime
 from math import floor
 import requests
@@ -222,10 +223,10 @@ def import_data_to_s3(num_import):
     from boto.s3.key import Key
     from tempfile import mkdtemp
     
-    conn = S3Connection(aws_access_key_id="AKIAIS5NHCFOO3QE6GNQ", aws_secret_access_key="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")
+    conn = S3Connection(aws_access_key_id="AKIAIQBQCAWC6FTCPFRQ", aws_secret_access_key="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")
     bucket = conn.get_bucket("legacyapp-images")
 
-    figures = Figure.objects.filter(image_url="not_found")[:num_import]
+    figures = Figure.objects.all()
     
     temp_dir = mkdtemp()
     
