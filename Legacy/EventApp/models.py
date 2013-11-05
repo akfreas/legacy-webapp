@@ -10,7 +10,7 @@ class Figure(models.Model):
     name = models.CharField(max_length=100)
     male = models.BooleanField()
     image_url = models.URLField(blank=True)
-    image_version = models.IntegerField(blank=True, null=True)
+    image_version = models.IntegerField()
     description = models.TextField(blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
     date_of_death = models.DateField(blank=True, null=True)
