@@ -237,7 +237,7 @@ def figure_pic_href(name, size):
     return image_url
 
 
-def import_data_to_s3(num_import):
+def import_data_to_s3(num_import, image_version):
 
     content_map = {'image/jpeg' : 'jpg', 'image/png' : 'png', 'image/jpg' : 'jpg', 'image/gif' : 'gif'}
 
@@ -248,7 +248,7 @@ def import_data_to_s3(num_import):
     conn = S3Connection(aws_access_key_id="AKIAIQBQCAWC6FTCPFRQ", aws_secret_access_key="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")
     bucket = conn.get_bucket("legacyapp-images")
 
-    figures = Figure.objects.all()
+    figures = Figure.objects.filter(image_version__lt=image_version)
     
     temp_dir = mkdtemp()
     
@@ -297,6 +297,7 @@ def import_data_to_s3(num_import):
                     except IOError:
 
                         figure.image_url = "not_found_0"
+                        figure.image_version = image_version
                         figure.save()
                         continue
 
@@ -312,15 +313,18 @@ def import_data_to_s3(num_import):
                 s3_pic_url = "http://%s.s3.amazonaws.com/%s" % (bucket.name, s3_pic_key.md5)
 
                 figure.image_url = s3_pic_url
+                figure.image_version = image_version
                 figure.save()
                 counter += 1
 
             else:
                 figure.image_url = "not_found_1"
+                figure.image_version = image_version
                 figure.save()
 
         else:
             figure.image_url = "not_found_2"
+            figure.image_version = image_version
             figure.save()
 
 
@@ -331,7 +335,7 @@ def import_data_to_s3(num_import):
 def import_until_done():
     
 
-    import_data_to_s3(0)
+    import_data_to_s3(0, 1)
 
 
 
