@@ -266,7 +266,11 @@ def import_data_to_s3(num_import):
             print "Pulling from %s." % pic_url
 
             pic_hash = md5(pic_url).hexdigest()
-            pic_request = requests.get(pic_url, verify=False)
+            try:
+                pic_request = requests.get(pic_url, verify=False)
+            except requests.exceptions.ConnectionError:
+                continue
+
             pic_file_extension = pic_url.split(".")[-1]
             content_type = pic_request.headers['content-type']
 
