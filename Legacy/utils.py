@@ -304,14 +304,8 @@ def import_data_to_s3(num_import):
          
 def import_until_done():
     
-    figures_nopic = Figure.objects.filter(image_url="not_found")
 
-
-    while figures_nopic.count() > 100:
-
-        #import pdb; pdb.set_trace()
-        import_data_to_s3(100)
-        figures_nopic = Figure.objects.filter(image_url="not_found")
+    import_data_to_s3(0)
 
 
 
