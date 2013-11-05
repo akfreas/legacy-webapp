@@ -29,6 +29,8 @@ def get_age(year, month, day):
 
 def figure_wikipedia_pic(figure_name, image_height):
 
+    print "Trying wikipedia..."
+
 
     wiki_images_url =  "http://en.wikipedia.org/w/api.php?format=json&action=query&titles=%s&prop=images&redirects" % figure_name
     wiki_images_get = requests.get(wiki_images_url)
@@ -129,6 +131,8 @@ def figure_wikipedia_pic(figure_name, image_height):
 
 def figure_freebase_pic(figure_name, image_height):
 
+    print "Trying freebase..."
+
     formatted_name = figure_name.lower().replace(" ", "_")
     api_key = "AIzaSyDN15Pi0PJpqnNlM64xiE65yW9shiZ2A1I"
     url = "https://www.googleapis.com/freebase/v1/topic/en/%s?key=%s&filter/common/topic/image&limit=1" % (formatted_name, api_key)
@@ -142,6 +146,24 @@ def figure_freebase_pic(figure_name, image_height):
         return url
     else:
         return None
+
+def figure_google_image_pic(figure_name, image_height):
+
+    print "Trying google..."
+
+    params_dict = {'q' : figure_name}
+    image_request = requests.get("https://ajax.googleapis.com/ajax/services/search/images?v=1.0", params=params_dict)
+
+    print image_request.text[:120]
+    if image_request.status_code == 200:
+
+        request_dict = image_request.json()
+        try:
+            image_url = request_dict['responseData']['results'][0]['url']
+            return image_url
+        except:
+            print request_dict
+            pass
 
 
 def populate_figure_datapoints(figure):
@@ -203,7 +225,7 @@ def figure_fb_profile_pic(figure_name, image_height):
 
 def figure_pic_href(name, size):
 
-    fetch_functions = [figure_freebase_pic, figure_wikipedia_pic]
+    fetch_functions = [figure_freebase_pic, figure_google_image_pic, figure_wikipedia_pic]
     image_url = None
 
 
