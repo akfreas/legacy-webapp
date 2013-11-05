@@ -272,7 +272,6 @@ def import_data_to_s3(num_import):
 
                         figure.image_url = "not_found_0"
                         figure.save()
-                        break
 
                     pic_filename += "." + content_map[content_type]
 
