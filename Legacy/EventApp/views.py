@@ -4,6 +4,7 @@ from django.shortcuts import render_to_response
 from django.core import serializers
 from django.db.models import F
 from django.views.decorators.csrf import csrf_exempt
+from django.db import IntegrityError
 from ios_notifications.models import Device as DV, APNService
 
 from random import sample
@@ -153,9 +154,13 @@ def get_or_create_device(device_token):
     except Device.DoesNotExist:
         device = Device(device_token=device_token)
 
-    apn_service = APNService.objects.get(name='legacyapp')
-    apn_device = DV(token=device_token, service=apn_service)
-    apn_device.save()
+    try:
+        apn_service = APNService.objects.get(name='legacyapp-production')
+        apn_device = DV(token=device_token, service=apn_service)
+        apn_device.save()
+    except IntegrityError:
+        pass
+
     return device
 
 def get_or_create_user(facebook_id, access_token):
