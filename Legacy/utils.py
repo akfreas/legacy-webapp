@@ -295,7 +295,7 @@ def import_data_to_s3(num_import, image_version):
                         new_image = image.resize(new_size)
                         new_image.save("%s.%s" % (pic_filename, content_map[content_type]))
                     except IOError:
-
+                        import pdb;pdb.set_trace()
                         figure.image_url = "not_found_0"
                         figure.image_version = image_version
                         figure.save()
@@ -335,7 +335,7 @@ def import_data_to_s3(num_import, image_version):
 def import_until_done():
     
 
-    import_data_to_s3(0, 1)
+    import_data_to_s3(0, 2)
 
 
 
@@ -343,7 +343,7 @@ def person_profile_pic(id, access_token=None):
 
     graph = GraphAPI(access_token)
 
-    fb_object = graph.get_object(id, fields="picture")
+    fb_object = graph.get_object(id, fields="picture.width(100).height(100)")
 
     picture_info = fb_object['picture']['data']
 
