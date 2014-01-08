@@ -309,7 +309,8 @@ def serialize_event_json(event):
         figure_dict = {
                 'id' : event.figure.id,
                 'name' : event.figure.name,
-                'image_url' : event.figure.image_url
+                'image_url' : event.figure.image_url,
+                'events_count' : event.figure.events.count()
                 }
         event_dict = {
                 'figure' : figure_dict,
