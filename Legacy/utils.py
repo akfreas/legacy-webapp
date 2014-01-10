@@ -17,7 +17,6 @@ from dateutil import relativedelta
 from EventApp.models import *
 from hashlib import md5
 import os
-from PIL import Image
 
 def get_age(year, month, day):
 
