@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 try:
-    from facebook import GraphAPI
+    from facebook import GraphAPI, GraphAPIError
 except ImportError:
-    from facebook.facebook import GraphAPI
+    from facebook.facebook import GraphAPI, GraphAPIError
+
 
 
 
@@ -343,12 +344,16 @@ def person_profile_pic(id, access_token=None):
 
     graph = GraphAPI(access_token)
 
-    fb_object = graph.get_object(id, fields="picture.width(100).height(100)")
+    try:
+        fb_object = graph.get_object(id, fields="picture")
 
-    picture_info = fb_object['picture']['data']
+        picture_info = fb_object['picture']['data']
 
-    if picture_info['is_silhouette'] == False:
-        return picture_info['url']
+        if picture_info['is_silhouette'] == False:
+            return picture_info['url']
+
+    except GraphAPIError:
+        return ""
 
 
 

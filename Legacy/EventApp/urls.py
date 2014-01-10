@@ -13,6 +13,8 @@ urlpatterns = patterns('EventApp.views',
      url(r'^figure/(\d*)/events', 'events_for_figure'),
 
      url(r'^users/add', 'add_users'),
+     url(r'^user/(\d*)/add', 'add_facebook_user'),
+     url(r'^user/(\d*)/event', 'event_for_facebook_user'),
      url(r'^user/(\d*)/delete', 'delete_user'),
      url(r'^user/(\d*)/update_birthday', 'update_birthday'),
      url(r'^device/information', 'save_device_information'),

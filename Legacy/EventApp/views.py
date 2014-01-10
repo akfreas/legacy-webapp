@@ -62,21 +62,25 @@ def add_users(request):
     requesting_user.save()
 
     for person_info in person_array:
-
-        fb_id = person_info['facebook_id']
-   
-        birthday = datetime.strptime(person_info['birthday'], "%Y/%m/%d")
-
-
-        fb_user = get_or_create_user(fb_id, access_token)
-        fb_user.birthday = birthday
-        fb_user.save()
-        fb_user.added_by.add(requesting_user)
-
+        add_user_from_info(person_info, requesting_user, access_token)
 
     json_string = json.dumps({'users_saved' : '%s' % len(person_array)})
 
     return HttpResponse(content=json_string, content_type="application/json")
+
+def add_user_from_info(person_info, requesting_user, access_token):
+
+    fb_id = person_info['facebook_id']
+
+    birthday = datetime.strptime(person_info['birthday'], "%Y/%m/%d")
+
+
+    fb_user = get_or_create_user(fb_id, access_token)
+    fb_user.birthday = birthday
+    fb_user.save()
+    fb_user.added_by.add(requesting_user)
+    return fb_user
+
 
 def validate_passcode(request, passcode):
     
@@ -101,9 +105,7 @@ def validate_passcode(request, passcode):
 
 def delete_user(request, user):
 
-    print request
     access_token, user_id = info_from_request_cookie(request)
-    print access_token, user_id
     requesting_user = get_or_create_user(user_id, access_token)
     requesting_user.date_last_seen = datetime.now()
     requesting_user.save()
@@ -218,6 +220,55 @@ def events_for_no_user(request):
     return HttpResponse(response, content_type="application/json")
 
 
+@csrf_exempt
+def add_facebook_user(request, fb_user_id):
+
+    access_token, user_id = info_from_request_cookie(request)
+    requesting_user = get_or_create_user(user_id, access_token)
+
+
+    person_info = json.loads(request.body)
+    new_user = add_user_from_info(person_info, requesting_user, access_token)
+    response_dict = {'added_user' : new_user.facebook_id}
+    response_string = json.dumps(response_dict)
+
+
+    return HttpResponse(response_string, content_type="application/json")
+    
+
+def event_for_facebook_user(request, fb_user_id):
+
+    access_token, user_id = info_from_request_cookie(request)
+    requesting_user = get_or_create_user(fb_user_id, access_token)
+
+    event_dict = event_dict_for_user(requesting_user, access_token)
+    serialized_dict = json.dumps(event_dict)
+
+    return HttpResponse(serialized_dict, content_type="application/json")
+
+
+
+def event_dict_for_user(user, access_token):
+        age = utils.get_age(user.birthday.year, user.birthday.month, user.birthday.day)
+        event = Event.objects.filter(age_years=age['years'], age_months=age['months'], age_days=age['days'])
+        user_dict = serialize_eventuser_json(user, access_token)
+        if user_dict != None:
+
+            event_dict = {}
+
+            if event.count() > 0:
+                event_dict = serialize_event_json(event[0])
+                
+            else:
+                event_dict['error'] = {'NoEventError' : "There are no entries for %s at their age." % user.first_name}
+
+            event_dict['person'] = user_dict
+
+            return event_dict
+        else:
+            return None
+
+
 def events(request):
 
     access_token, user_id = info_from_request_cookie(request)
@@ -234,33 +285,15 @@ def events(request):
 
     event_array = []
 
-    def event_dict_for_user(user):
-        age = utils.get_age(user.birthday.year, user.birthday.month, user.birthday.day)
-        event = Event.objects.filter(age_years=age['years'], age_months=age['months'], age_days=age['days'])
-        user_dict = serialize_eventuser_json(user, access_token)
-
-        event_dict = {}
-
-        if event.count() > 0:
-            event_dict = serialize_event_json(event[0])
-            
-        else:
-            event_dict['error'] = {'NoEventError' : "There are no entries for %s at their age." % user.first_name}
-
-        event_dict['person'] = user_dict
-
-        return event_dict
-
-
 
     for user_addedby in all_users:
             user = user_addedby.from_eventuser
             if user.birthday != None:
-                event_dict = event_dict_for_user(user)
+                event_dict = event_dict_for_user(user, access_token)
                 if event_dict != None:
                     event_array.append(event_dict)
 
-    event_array.append(event_dict_for_user(requesting_user))
+    event_array.append(event_dict_for_user(requesting_user, access_token))
 
     all_events = Event.objects.all()
     num_all_events = len(event_array)
@@ -283,15 +316,18 @@ def serialize_eventuser_json(person, access_token):
 
     profile_pic = utils.person_profile_pic(person.facebook_id, access_token)
 
-    user_dict = {
-            'facebook_id' : person.facebook_id,
-            'first_name' : person.first_name,
-            'last_name' : person.last_name,
-            'birthday' : person.birthday.strftime("%m/%d/%Y"),
+    if profile_pic != "":
+        user_dict = {
+                'facebook_id' : person.facebook_id,
+                'first_name' : person.first_name,
+                'last_name' : person.last_name,
+                'birthday' : person.birthday.strftime("%m/%d/%Y"),
 
-            'profile_pic' : profile_pic
-            }
-    return user_dict
+                'profile_pic' : profile_pic
+                }
+        return user_dict
+    else:
+        return None
 
 def serialize_event_json_array(events):
 
