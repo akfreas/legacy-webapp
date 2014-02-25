@@ -26,6 +26,10 @@ def event(request, years, months, days):
     response = serializers.serialize("json", event) 
     return HttpResponse(response)
 
+def configuration(request):
+    configuration_file = open(settings.CONFIGURATION_PATH)
+    return HttpResponse(content=configuration_file, content_type="application/json")
+
 @csrf_exempt
 def test(request):
     return HttpResponse(content="Healthy.")

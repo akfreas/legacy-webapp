@@ -12,6 +12,7 @@ urlpatterns = patterns('EventApp.views',
      url(r'^events', 'events'),
      url(r'^figure/(\d*)/events', 'events_for_figure'),
 
+     url(r'^configuration', 'configuration'),
      url(r'^users/add', 'add_users'),
      url(r'^user/(\d*)/add', 'add_facebook_user'),
      url(r'^user/(\d*)/event', 'event_for_facebook_user'),

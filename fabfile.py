@@ -5,15 +5,17 @@ from fabric.contrib.console import confirm
 from time import sleep
 
 code_dir = '/var/www/legacyapp/current'
-env.key_filename = "/Users/akfreas/Dropbox/sashimiblade/AppValve-deploy-data/private_keys/Alex-3.pem"
-env.host_string = "ubuntu@legacyapp.sashimiblade.com"
+env.key_filename = "/Users/akfreas/Downloads/LegacyAppV11.pem"
+env.host_string = "ubuntu@apiv2.legacyapp.net"
 
 
 def deploy():
 
    print env.key_filename
    with cd(code_dir):
+        
         sudo("GIT_SSH=/home/ubuntu/ssh_git_wrapper.sh git pull origin master")
+        sudo("git checkout master")
    restart_server()
 
 
