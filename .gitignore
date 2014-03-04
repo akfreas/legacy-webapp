@@ -1,7 +1,6 @@
 *.pyc
 *.swp
 .Python
-local_settings.py
 client_data
 
 lib

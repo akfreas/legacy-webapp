@@ -177,6 +177,7 @@ def get_or_create_user(facebook_id, access_token):
     except EventUser.DoesNotExist:
         user = EventUser(facebook_id=facebook_id)
         user.date_added = datetime.now()
+        user.save()
         utils.populate_user_with_fb_fields(user, access_token)
         user.save()
 
